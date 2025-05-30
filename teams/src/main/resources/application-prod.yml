@@ -1,9 +1,0 @@
-spring:
-  application:
-    name: teams
-
-build:
-  version: "1.0.0-PROD"
-
-server:
-  port: 8082
