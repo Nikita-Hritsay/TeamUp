@@ -1,0 +1,40 @@
+services:
+  users:
+    image: teamup/users:s1
+    container_name: users-ms
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - "teamup"
+
+  cards:
+    image: teamup/cards:s1
+    container_name: cards-ms
+    ports:
+      - "8081:8081"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - "teamup"
+
+  teams:
+    image: teamup/teams:s1
+    container_name: teams-ms
+    ports:
+      - "8082:8082"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - "teamup"
+
+networks:
+  "teamup":
+    driver: "bridge"

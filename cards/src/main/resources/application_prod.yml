@@ -1,0 +1,13 @@
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+
+build:
+  version: "1.0"
+
+
+cards:
+  message: "Welcome to the Prod TeamUp cards APIs"
+  contactDetails:
+    name: "Mykyta Hrytsai"

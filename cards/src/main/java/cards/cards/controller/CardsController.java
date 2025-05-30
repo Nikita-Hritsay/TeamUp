@@ -12,7 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,12 +28,30 @@ import org.springframework.web.bind.annotation.*;
         description = "Operations for managing project cards"
 )
 @RestController
-@AllArgsConstructor
 @RequestMapping(path = "/api/v1/cards", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Validated
 public class CardsController {
 
     private final ICardsService cardsService;
+    
+    @Value("${build.version}")
+    private String buildVersion;
+
+    @Autowired
+    public CardsController(ICardsService cardsService) {
+        this.cardsService = cardsService;
+    }
+
+    @Operation(
+            summary = "Get Build Version",
+            description = "Get the current build version of the service"
+    )
+    @GetMapping("/build-version")
+    public ResponseEntity<String> getBuildVersion() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(buildVersion);
+    }
 
     @Operation(
             summary = "Create Card REST API",

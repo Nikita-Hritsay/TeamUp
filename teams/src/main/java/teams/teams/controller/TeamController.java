@@ -7,7 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +27,30 @@ import java.util.List;
         description = "Operations for managing team members in projects"
 )
 @RestController
-@AllArgsConstructor
 @RequestMapping(path = "/api/v1/teams", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Validated
 public class TeamController {
 
     private final ITeamService teamService;
+    
+    @Value("${build.version}")
+    private String buildVersion;
+
+    @Autowired
+    public TeamController(ITeamService teamService) {
+        this.teamService = teamService;
+    }
+
+    @Operation(
+        summary = "Get Build Version",
+        description = "Get the current build version of the service"
+    )
+    @GetMapping("/build-version")
+    public ResponseEntity<String> getBuildVersion() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(buildVersion);
+    }
 
     @Operation(
             summary = "Join Team REST API",

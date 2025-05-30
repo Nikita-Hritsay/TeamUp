@@ -8,6 +8,10 @@ server:
 spring:
   application:
     name: teams
+  config:
+    import: "optional:configserver:http://localhost:8071"
+  profiles:
+    active: default
   # Database configuration
   datasource:
     url: jdbc:h2:mem:teamsdb
@@ -45,3 +49,8 @@ springdoc:
     operationsSorter: method
     tagsSorter: alpha
   packages-to-scan: teams.teams.controller
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8070/eureka/
