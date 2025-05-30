@@ -3,14 +3,15 @@ package cards.cards.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @Schema(
         name = "Response",
         description = "Schema to hold successful response information"
 )
-public class ResponseDto {
+public class ResponseDto
+{
 
     @Schema(
             description = "Status code of the response",
@@ -23,4 +24,9 @@ public class ResponseDto {
             example = "Request processed successfully"
     )
     private String statusMessage;
+
+    public ResponseDto(String statusCode, String statusMessage) {
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
+    }
 }

@@ -1,40 +1,145 @@
+version: "3.8"
+
 services:
+  eureka-server:
+    image: teamup/eureka-server:latest
+    container_name: eureka-server
+    ports:
+      - "8070:8070"
+    networks:
+      - teamup-network
+    healthcheck:
+      test: curl -f http://localhost:8070/actuator/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  config-server:
+    image: teamup/cspring-cloud-server:latest
+    container_name: spring-cloud-server
+    ports:
+      - "8071:8071"
+    networks:
+      - teamup-network
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: curl -f http://localhost:8071/actuator/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   users:
     image: teamup/users:s1
     container_name: users-ms
     ports:
-      - "8080:8080"
-    deploy:
-      resources:
-        limits:
-          memory: 700m
-    networks:
-      - "teamup"
-
-  cards:
-    image: teamup/cards:s1
-    container_name: cards-ms
-    ports:
       - "8081:8081"
-    deploy:
-      resources:
-        limits:
-          memory: 700m
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8071
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
     networks:
-      - "teamup"
+      - teamup-network
+    depends_on:
+      config-server:
+        condition: service_healthy
+      users-mysql:
+        condition: service_started
+    healthcheck:
+      test: curl -f http://localhost:8081/actuator/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   teams:
     image: teamup/teams:s1
     container_name: teams-ms
     ports:
       - "8082:8082"
-    deploy:
-      resources:
-        limits:
-          memory: 700m
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8071
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
     networks:
-      - "teamup"
+      - teamup-network
+    depends_on:
+      config-server:
+        condition: service_healthy
+      teams-mysql:
+        condition: service_started
+    healthcheck:
+      test: curl -f http://localhost:8082/actuator/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  cards:
+    image: teamup/cards:s1
+    container_name: cards-ms
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8071
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+    networks:
+      - teamup-network
+    depends_on:
+      config-server:
+        condition: service_healthy
+      cards-mysql:
+        condition: service_started
+    healthcheck:
+      test: curl -f http://localhost:8083/actuator/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  users-mysql:
+    image: mysql:8.0
+    container_name: users-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: usersdb
+    ports:
+      - "3036:3306"
+    networks:
+      - teamup-network
+    volumes:
+      - users-mysql-data:/var/lib/mysql
+
+  teams-mysql:
+    image: mysql:8.0
+    container_name: teams-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: teamsdb
+    ports:
+      - "3037:3306"
+    networks:
+      - teamup-network
+    volumes:
+      - teams-mysql-data:/var/lib/mysql
+
+  cards-mysql:
+    image: mysql:8.0
+    container_name: cards-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cardsdb
+    ports:
+      - "3038:3306"
+    networks:
+      - teamup-network
+    volumes:
+      - cards-mysql-data:/var/lib/mysql
 
 networks:
-  "teamup":
-    driver: "bridge"
+  teamup-network:
+    driver: bridge
+
+volumes:
+  users-mysql-data:
+  teams-mysql-data:
+  cards-mysql-data:
