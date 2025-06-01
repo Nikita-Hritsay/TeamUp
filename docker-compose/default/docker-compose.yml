@@ -1,0 +1,79 @@
+services:
+  config-server:
+    image: "teamup/configserver"
+    container_name: configserver-ms
+    ports:
+      - "8071:8071"
+    healthcheck:
+      test: "curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 1000m
+    networks:
+      - teamup
+
+  users:
+    image: "teamup/users"
+    container_name: users-ms
+    ports:
+      - "8080:8080"
+    depends_on:
+      config-server:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1000m
+    networks:
+      - teamup
+    environment:
+      SPRING_APPLICATION_NAME: "users"
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
+      SPRING_PROFILES_ACTIVE: default
+
+  teams:
+    image: "teamup/teams"
+    container_name: teams-ms
+    ports:
+      - "8081:8081"
+    depends_on:
+      config-server:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1000m
+    networks:
+      - teamup
+    environment:
+      SPRING_APPLICATION_NAME: "teams"
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
+      SPRING_PROFILES_ACTIVE: default
+
+  cards:
+    image: "teamup/cards"
+    container_name: cards-ms
+    ports:
+      - "8082:8082"
+    depends_on:
+      config-server:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1000m
+    networks:
+      - teamup
+    environment:
+      SPRING_APPLICATION_NAME: "cards"
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
+      SPRING_PROFILES_ACTIVE: default
+
+networks:
+  teamup:
+    driver: "bridge"
