@@ -1,17 +1,18 @@
+server:
+  port: 8080
+
 spring:
   application:
-    name: users
-  config:
-    import: "optional:configserver:http://localhost:8071"
+    name: "users"
   profiles:
-    active: default
+    active: "qa"
   datasource:
-    url: jdbc:mysql://localhost:3036/usersdb
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:h2:mem:users
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ''
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
     show-sql: true
@@ -19,13 +20,5 @@ spring:
       hibernate:
         format_sql: true
 
-build:
-  version: "1.0.0"
-
-server:
-  port: 8081
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8070/eureka/
+  config:
+    import: "optional:configserver:http://localhost:8071/"

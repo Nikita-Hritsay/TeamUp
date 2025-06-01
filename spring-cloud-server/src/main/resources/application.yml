@@ -10,20 +10,6 @@ spring:
     config:
       server:
         native:
-          search-locations: "classpath:/config"
+          search-locations: "classpath:/configs"
 
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://eureka-server:8070/eureka/
-  instance:
-    preferIpAddress: true
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health
-  endpoint:
-    health:
-      show-details: always

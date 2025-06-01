@@ -1,60 +1,28 @@
-# Server configuration
 server:
-  port: 8082
-  servlet:
-    context-path: /
+  port: 8081
 
-# Spring configuration
 spring:
   application:
-    name: teams
-  config:
-    import: "optional:configserver:http://localhost:8071"
+    name: "teams"
   profiles:
-    active: default
-  # Database configuration
+    active: "prod"
   datasource:
-    url: jdbc:mysql://localhost:3037/teamsdb
+    url: jdbc:h2:mem:teamsdb
     username: root
     password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  # JPA configuration
+    driver-class-name: org.h2.Driver
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-  # H2 console configuration
   h2:
     console:
       enabled: true
       path: /h2-console
 
-# Build configuration
-build:
-  version: "1.0.0"
-
-# Logging configuration
-logging:
-  level:
-    org.springframework: INFO
-    teams.teams: DEBUG
-
-# Swagger/OpenAPI configuration
-springdoc:
-  api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    enabled: true
-    operationsSorter: method
-    tagsSorter: alpha
-  packages-to-scan: teams.teams.controller
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8070/eureka/
+  config:
+    import: "optional:configserver:http://localhost:8071/"

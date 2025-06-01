@@ -27,7 +27,7 @@ import java.util.List;
         description = "Operations for managing team members in projects"
 )
 @RestController
-@RequestMapping(path = "/api/v1/teams", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(path = "/api/v1", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Validated
 public class TeamController {
 

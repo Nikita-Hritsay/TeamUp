@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
         description = "Operations for managing project cards"
 )
 @RestController
-@RequestMapping(path = "/api/v1/cards", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(path = "/api/v1", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Validated
 public class CardsController {
 
