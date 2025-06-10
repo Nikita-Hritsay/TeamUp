@@ -99,7 +99,7 @@
                         </exclude>
                     </excludes>
                     <image>
-                        <name>teamup/users:s1</name>
+                        <name>mykyta2/users:s1</name>
                     </image>
                     <docker>
                         <host>tcp://localhost:2375</host>

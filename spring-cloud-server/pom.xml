@@ -65,7 +65,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<image>
-						<name>teamup/cspring-cloud-server</name>
+						<name>mykyta2/config-server:s1</name>
 					</image>
 				</configuration>
 			</plugin>

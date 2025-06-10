@@ -94,7 +94,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <image>
-                        <name>teamup/cards</name>
+                        <name>mykyta2/cards</name>
                     </image>
                     <docker>
                         <host>tcp://localhost:2375</host>

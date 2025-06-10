@@ -1,79 +1,55 @@
 services:
   config-server:
-    image: "teamup/configserver"
+    image: "mykyta2/config-server:s1"
     container_name: configserver-ms
     ports:
       - "8071:8071"
     healthcheck:
-      test: "curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1"
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8071/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 10s
-    deploy:
-      resources:
-        limits:
-          memory: 1000m
-    networks:
-      - teamup
+    extends:
+      file: common-config.yml
+      service: microservice-base-config
 
   users:
-    image: "teamup/users"
+    image: "mykyta2/users:s1"
     container_name: users-ms
     ports:
       - "8080:8080"
-    depends_on:
-      config-server:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          memory: 1000m
-    networks:
-      - teamup
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
     environment:
       SPRING_APPLICATION_NAME: "users"
-      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
       SPRING_PROFILES_ACTIVE: default
 
   teams:
-    image: "teamup/teams"
+    image: "mykyta2/teams:s1"
     container_name: teams-ms
     ports:
       - "8081:8081"
-    depends_on:
-      config-server:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          memory: 1000m
-    networks:
-      - teamup
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
     environment:
       SPRING_APPLICATION_NAME: "teams"
-      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
       SPRING_PROFILES_ACTIVE: default
 
   cards:
-    image: "teamup/cards"
+    image: "mykyta2/cards:s1"
     container_name: cards-ms
     ports:
       - "8082:8082"
-    depends_on:
-      config-server:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          memory: 1000m
-    networks:
-      - teamup
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
     environment:
       SPRING_APPLICATION_NAME: "cards"
-      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
       SPRING_PROFILES_ACTIVE: default
 
 networks:
-  teamup:
+  mykyta2:
     driver: "bridge"

@@ -88,7 +88,7 @@
                         </exclude>
                     </excludes>
                     <image>
-                        <name>teamup/teams:s1</name>
+                        <name>mykyta2/teams:s1</name>
                     </image>
                     <docker>
                         <host>tcp://localhost:2375</host>
