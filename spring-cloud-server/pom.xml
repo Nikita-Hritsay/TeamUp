@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>cloudserver</groupId>
-	<artifactId>spring-cloud-server</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>spring-cloud-server</name>
-	<description>spring-cloud-server</description>
+	<artifactId>2config-server</artifactId>
+	<version>s1</version>
+	<name>mykyta2/config-server</name>
+	<description>mykyta/2config-server</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -63,10 +63,18 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>3.4.3</version>
 				<configuration>
-					<image>
-						<name>mykyta2/config-server:s1</name>
-					</image>
+					<from>
+						<image>eclipse-temurin:21-jdk</image>
+					</from>
+					<to>
+						<image>mykyta2/config-server:s1</image>
+					</to>
 				</configuration>
 			</plugin>
 		</plugins>

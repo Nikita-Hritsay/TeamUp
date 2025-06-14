@@ -1,15 +1,31 @@
 services:
+  rabbit:
+    image: rabbitmq:3.12-management
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
   config-server:
     image: "mykyta2/config-server:s1"
-    container_name: configserver-ms
+    container_name: config-server-ms
     ports:
       - "8071:8071"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8071/actuator/health"]
+      test: ["CMD", "true"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 10s
+    depends_on:
+      rabbit:
+        condition: service_healthy
     extends:
       file: common-config.yml
       service: microservice-base-config
@@ -22,6 +38,9 @@ services:
     extends:
       file: common-config.yml
       service: microservice-configserver-config
+    depends_on:
+      config-server:
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "users"
       SPRING_PROFILES_ACTIVE: default
@@ -34,6 +53,9 @@ services:
     extends:
       file: common-config.yml
       service: microservice-configserver-config
+    depends_on:
+      config-server:
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "teams"
       SPRING_PROFILES_ACTIVE: default
@@ -46,6 +68,9 @@ services:
     extends:
       file: common-config.yml
       service: microservice-configserver-config
+    depends_on:
+      config-server:
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "cards"
       SPRING_PROFILES_ACTIVE: default
