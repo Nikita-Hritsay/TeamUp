@@ -86,28 +86,24 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.4.3</version>
                 <configuration>
-                    <image>
-                        <name>mykyta2/cards</name>
-                    </image>
-                    <docker>
-                        <host>tcp://localhost:2375</host>
-                    </docker>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
+                    <to>
+                        <image>mykyta2/cards:s1</image>
+                    </to>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
 </project>
+<!-- build with:  mvn compile jib:build -->

@@ -18,7 +18,7 @@ services:
     ports:
       - "8071:8071"
     healthcheck:
-      test: ["CMD", "true"]
+      test: ["CMD", "curl", "-f", "http://localhost:8071/actuator/health/readiness"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -29,21 +29,6 @@ services:
     extends:
       file: common-config.yml
       service: microservice-base-config
-
-  users:
-    image: "mykyta2/users:s1"
-    container_name: users-ms
-    ports:
-      - "8080:8080"
-    extends:
-      file: common-config.yml
-      service: microservice-configserver-config
-    depends_on:
-      config-server:
-        condition: service_healthy
-    environment:
-      SPRING_APPLICATION_NAME: "users"
-      SPRING_PROFILES_ACTIVE: default
 
   teams:
     image: "mykyta2/teams:s1"
@@ -73,6 +58,21 @@ services:
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "cards"
+      SPRING_PROFILES_ACTIVE: default
+
+  users:
+    image: "mykyta2/users:s1"
+    container_name: users-ms
+    ports:
+      - "8083:8083"
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+    depends_on:
+      config-server:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "users"
       SPRING_PROFILES_ACTIVE: default
 
 networks:
