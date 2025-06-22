@@ -1,0 +1,20 @@
+services:
+  network-deploy-service:
+    networks:
+      - mykyta2
+
+  microservice-base-config:
+    extends:
+      service: network-deploy-service
+    deploy:
+      resources:
+        limits:
+          memory: 1000m
+
+
+  microservice-configserver-config:
+    extends:
+      service: microservice-base-config
+    environment:
+      SPRING_PROFILES_ACTIVE: qa
+      SPRING_CONFIG_IMPORT: "configserver:http://config-server:8071/"

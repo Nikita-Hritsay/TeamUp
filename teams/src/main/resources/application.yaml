@@ -7,22 +7,19 @@ spring:
   profiles:
     active: "prod"
   datasource:
-    url: jdbc:h2:mem:teamsdb
+    url: jdbc:mysql://localhost:3308/teamsdb
     username: root
     password: root
-    driver-class-name: org.h2.Driver
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
     hibernate:
       ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+  sql:
+    init:
+      mode: always
 
   config:
-    import: "optional:configserver:http://config-server:8071/"
+    import: "optional:configserver:http://localhost:8071/"
+
+## build with:  mvn compile jib:build
+## create db: docker run -p 3308:3306 --name teamsdb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=teamsdb -d mysql

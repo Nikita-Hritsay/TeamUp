@@ -7,18 +7,20 @@ spring:
   profiles:
     active: "prod"
   datasource:
-    url: jdbc:h2:mem:users
-    driverClassName: org.h2.Driver
+    url: jdbc:mysql://localhost:3306/userdb
     username: root
     password: root
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
     hibernate:
       ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+  sql:
+    init:
+      mode: always
 
   config:
     import: "optional:configserver:http://localhost:8071/"
+
+
+## build with:  mvn compile jib:build
+## create db: docker run -p 3306:3306 --name userdb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=userdb -d mysql docker ps
