@@ -1,16 +1,57 @@
 services:
-  rabbit:
-    image: rabbitmq:3.12-management
-    hostname: rabbitmq
+  usersdb:
+    image: mysql
+    container_name: usersdb
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - 3306:3306
     healthcheck:
-      test: rabbitmq-diagnostics check_port_connectivity
-      interval: 10s
-      timeout: 5s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
       retries: 10
-      start_period: 5s
+      interval: 10s
+      start_period: 10s
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: userdb
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+
+  cardsdb:
+    image: mysql
+    container_name: cardsdb
+    ports:
+      - 3307:3306
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
+      interval: 10s
+      start_period: 10s
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cardsdb
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+
+  teamsdb:
+    image: mysql
+    container_name: teamsdb
+    ports:
+      - 3308:3306
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
+      interval: 10s
+      start_period: 10s
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: teamsdb
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
 
   config-server:
     image: "mykyta2/config-server:s1"
@@ -24,7 +65,11 @@ services:
       retries: 10
       start_period: 10s
     depends_on:
-      rabbit:
+      usersdb:
+        condition: service_healthy
+      cardsdb:
+        condition: service_healthy
+      teamsdb:
         condition: service_healthy
     extends:
       file: common-config.yml
@@ -43,6 +88,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "teams"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://teamsdb:3306/teamsdb"
 
   cards:
     image: "mykyta2/cards:s1"
@@ -57,6 +103,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "cards"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://cardsdb:3306/cardsdb"
 
   users:
     image: "mykyta2/users:s1"
@@ -71,6 +118,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "users"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://usersdb:3306/userdb"
 
 networks:
   mykyta2:
