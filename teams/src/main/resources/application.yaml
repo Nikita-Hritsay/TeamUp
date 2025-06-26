@@ -21,5 +21,29 @@ spring:
   config:
     import: "optional:configserver:http://localhost:8071/"
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  info:
+    env:
+      enabled: true
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://localhost:8070/eureka/
+
 ## build with:  mvn compile jib:build
+info:
+  app:
+    name: "teams"
+    description: "Teams App"
+    version: "1.0.0"
+
 ## create db: docker run -p 3308:3306 --name teamsdb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=teamsdb -d mysql

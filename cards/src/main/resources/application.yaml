@@ -22,5 +22,29 @@ spring:
   config:
     import: "optional:configserver:http://localhost:8071/"
 
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  info:
+    env:
+      enabled: true
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://localhost:8070/eureka/
+
 ## build with:  mvn compile jib:build
+info:
+  app:
+    name: "cards"
+    description: "Cards App"
+    version: "1.0.0"
 ## create db: docker run -p 3307:3306 --name cardsdb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=cardsdb -d mysql
