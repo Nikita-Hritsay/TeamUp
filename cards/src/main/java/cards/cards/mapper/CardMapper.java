@@ -4,11 +4,18 @@ import cards.cards.dto.CardRequestDto;
 import cards.cards.dto.CardResponseDto;
 import cards.cards.entity.Card;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class CardMapper {
+
+    public static List<CardResponseDto> mapToCardsResponseDto(List<Card> cards) {
+        return cards.stream().map(CardMapper::mapToCardResponseDto).collect(Collectors.toList());
+    }
 
     /**
      * Maps Card entity to CardResponseDto
-     * 
+     *
      * @param card Card entity to map
      * @return CardResponseDto with mapped values
      */
@@ -28,9 +35,9 @@ public class CardMapper {
 
     /**
      * Maps CardRequestDto to Card entity
-     * 
+     *
      * @param requestDto CardRequestDto to map
-     * @param card Card entity to update (can be a new instance)
+     * @param card       Card entity to update (can be a new instance)
      * @return Card entity with mapped values
      */
     public static Card mapToCard(CardRequestDto requestDto, Card card) {

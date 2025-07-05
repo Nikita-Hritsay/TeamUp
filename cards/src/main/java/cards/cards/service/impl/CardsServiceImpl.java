@@ -15,24 +15,24 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.List;
+
 @Service
 @AllArgsConstructor
-public class CardsServiceImpl implements ICardsService
-{
+public class CardsServiceImpl implements ICardsService {
 
     private final CardsRepository cardsRepository;
 
     @Override
-    public CardResponseDto createCard(CardRequestDto cardRequestDto)
-    {
+    public CardResponseDto createCard(CardRequestDto cardRequestDto) {
         Card card = CardMapper.mapToCard(cardRequestDto, new Card());
         Card savedCard = cardsRepository.save(card);
         return CardMapper.mapToCardResponseDto(savedCard);
     }
 
     @Override
-    public CardResponseDto getCardById(Long cardId)
-    {
+    public CardResponseDto getCardById(Long cardId) {
         Card card = cardsRepository.findById(cardId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card", "id",
                         cardId.toString()));
@@ -40,9 +40,14 @@ public class CardsServiceImpl implements ICardsService
     }
 
     @Override
+    public List<CardResponseDto> getCardsByUserId(Long userId) {
+        List<Card> cards = cardsRepository.findByOwnerId(userId);
+        return CardMapper.mapToCardsResponseDto(cards);
+    }
+
+    @Override
     public CardResponseDto updateCard(Long cardId,
-            CardRequestDto cardRequestDto)
-    {
+                                      CardRequestDto cardRequestDto) {
         Card existingCard = cardsRepository.findById(cardId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card", "id",
                         cardId.toString()));
@@ -54,8 +59,7 @@ public class CardsServiceImpl implements ICardsService
 
     @Override
     @Transactional
-    public boolean deleteCard(Long cardId)
-    {
+    public boolean deleteCard(Long cardId) {
         Card card = cardsRepository.findById(cardId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card", "id",
                         cardId.toString()));
@@ -65,16 +69,14 @@ public class CardsServiceImpl implements ICardsService
     }
 
     @Override
-    public Page<CardResponseDto> getAllCards(Pageable pageable)
-    {
+    public Page<CardResponseDto> getAllCards(Pageable pageable) {
         Page<Card> cardsPage = cardsRepository.findAll(pageable);
         return cardsPage.map(CardMapper::mapToCardResponseDto);
     }
 
     @Override
     public Page<CardResponseDto> getFilteredCards(Long ownerId, String title,
-            Pageable pageable)
-    {
+                                                  Pageable pageable) {
         Specification<Card> spec = CardSpecification.where(
                 CardSpecification.hasOwnerId(ownerId),
                 CardSpecification.titleContains(title)

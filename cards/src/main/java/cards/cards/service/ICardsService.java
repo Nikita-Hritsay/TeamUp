@@ -5,6 +5,8 @@ import cards.cards.dto.CardResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface ICardsService {
 
     /**
@@ -22,6 +24,14 @@ public interface ICardsService {
      * @return the card with the given ID
      */
     CardResponseDto getCardById(Long cardId);
+
+    /**
+     * Retrieves a card by users ID
+     *
+     * @param userId the ID of the card to retrieve
+     * @return the card with the given ID
+     */
+    List<CardResponseDto> getCardsByUserId(Long userId);
 
     /**
      * Updates an existing card

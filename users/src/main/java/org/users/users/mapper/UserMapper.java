@@ -1,17 +1,19 @@
 package org.users.users.mapper;
 
+import org.users.users.dto.CardResponseDto;
 import org.users.users.dto.RoleDto;
 import org.users.users.dto.UserDto;
 import org.users.users.entity.Role;
 import org.users.users.entity.User;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UserMapper
 {
 
-    public static UserDto mapToUserDto(User user, UserDto userDto)
+    public static UserDto mapToUserDto(User user, UserDto userDto, List<CardResponseDto> userCards)
     {
         userDto.setId(user.getId());
         userDto.setEmail(user.getEmail());
@@ -28,6 +30,7 @@ public class UserMapper
                     .collect(Collectors.toSet());
             userDto.setRoles(roleDtos);
         }
+        userDto.setCards(userCards);
 
         return userDto;
     }

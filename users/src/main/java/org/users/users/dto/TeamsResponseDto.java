@@ -1,4 +1,4 @@
-package teams.teams.dto;
+package org.users.users.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.Data;
         name = "Response",
         description = "Schema to hold successful response information"
 )
-public class ResponseDto {
+public class TeamsResponseDto {
 
     @Schema(
             description = "Status code of the response",

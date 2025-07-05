@@ -1,6 +1,8 @@
 package org.users.users.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.users.users.dto.CardResponseDto;
 import org.users.users.dto.UserDto;
 import org.users.users.entity.Role;
 import org.users.users.entity.User;
@@ -12,28 +14,32 @@ import org.users.users.repository.UserRepository;
 import org.users.users.service.IUserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.users.users.service.client.CardsFeignClient;
+import org.users.users.service.client.TeamsFeignClient;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 @Service
 @AllArgsConstructor
-public class UserServiceImpl implements IUserService
-{
+public class UserServiceImpl implements IUserService {
 
     private RoleRepository roleRepository;
 
     private UserRepository userRepository;
 
+    private CardsFeignClient cardsFeignClient;
+
+    private TeamsFeignClient teamsFeignClient;
+
     @Override
-    public void createUser(UserDto userDto)
-    {
+    public void createUser(UserDto userDto) {
         User user = UserMapper.mapToUser(userDto, new User());
         Optional<User> optionalUser = userRepository.findByMobileNumber(
                 userDto.getMobileNumber());
-        if (optionalUser.isPresent())
-        {
+        if (optionalUser.isPresent()) {
             throw new UserAlreadyExistsException(
                     "User already exists with given mobile number: " + userDto.getMobileNumber());
         }
@@ -41,8 +47,7 @@ public class UserServiceImpl implements IUserService
         userRepository.save(user);
     }
 
-    private Role createNewUserWithDefaultRole(User user)
-    {
+    private Role createNewUserWithDefaultRole(User user) {
         Role userRole = roleRepository.findByRoleName("USER")
                 .orElseGet(() -> roleRepository.save(new Role().withRoleName("USER")));
 
@@ -51,18 +56,18 @@ public class UserServiceImpl implements IUserService
     }
 
     @Override
-    public UserDto fetchUser(Long id)
-    {
+    public UserDto fetchUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id",
                         id.toString()));
 
-        return UserMapper.mapToUserDto(user, new UserDto());
+        List<CardResponseDto> userCards = cardsFeignClient.getCardsByUserId(user.getId()).getBody();
+
+        return UserMapper.mapToUserDto(user, new UserDto(), userCards);
     }
 
     @Override
-    public boolean updateUser(UserDto userDto)
-    {
+    public boolean updateUser(UserDto userDto) {
         boolean updated = false;
 
         User user = userRepository.findById(userDto.getId())
@@ -72,8 +77,7 @@ public class UserServiceImpl implements IUserService
         Optional<User> byMobileNumber = userRepository.findByMobileNumber(
                 userDto.getMobileNumber());
         if (byMobileNumber.isPresent() && !Objects.equals(user.getId(),
-                byMobileNumber.get().getId()))
-        {
+                byMobileNumber.get().getId())) {
             throw new UserAlreadyExistsException(
                     "User already exists with given mobile number: " + userDto.getMobileNumber());
         }
@@ -91,8 +95,7 @@ public class UserServiceImpl implements IUserService
 
     @Override
     @Transactional
-    public boolean deleteUser(Long userId)
-    {
+    public boolean deleteUser(Long userId) {
         boolean deleted = false;
         User user = userRepository.findById(userId)
                 .orElseThrow(

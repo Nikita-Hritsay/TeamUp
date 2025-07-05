@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import teams.teams.constants.TeamConstants;
-import teams.teams.dto.ResponseDto;
+import teams.teams.dto.TeamsResponseDto;
 import teams.teams.dto.TeamMemberRequestDto;
 import teams.teams.dto.TeamMemberResponseDto;
 import teams.teams.service.ITeamService;
@@ -61,13 +61,13 @@ public class TeamController {
             description = "HTTP Status CREATED"
     )
     @PostMapping("/{cardId}/join")
-    public ResponseEntity<ResponseDto> joinTeam(
+    public ResponseEntity<TeamsResponseDto> joinTeam(
             @PathVariable Long cardId,
             @Valid @RequestBody TeamMemberRequestDto teamMemberRequestDto) {
         teamService.joinTeam(cardId, teamMemberRequestDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new ResponseDto(TeamConstants.STATUS_201, TeamConstants.MESSAGE_201));
+                .body(new TeamsResponseDto(TeamConstants.STATUS_201, TeamConstants.MESSAGE_201));
     }
 
     @Operation(
@@ -79,13 +79,13 @@ public class TeamController {
             description = "HTTP Status CREATED"
     )
     @PostMapping("/{cardId}/invite")
-    public ResponseEntity<ResponseDto> inviteToTeam(
+    public ResponseEntity<TeamsResponseDto> inviteToTeam(
             @PathVariable Long cardId,
             @Valid @RequestBody TeamMemberRequestDto teamMemberRequestDto) {
         teamService.inviteToTeam(cardId, teamMemberRequestDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new ResponseDto(TeamConstants.STATUS_201, TeamConstants.MESSAGE_201));
+                .body(new TeamsResponseDto(TeamConstants.STATUS_201, TeamConstants.MESSAGE_201));
     }
 
     @Operation(
@@ -101,7 +101,7 @@ public class TeamController {
                     responseCode = "404",
                     description = "Team member not found",
                     content = @Content(
-                            schema = @Schema(implementation = ResponseDto.class)
+                            schema = @Schema(implementation = TeamsResponseDto.class)
                     )
             )
     })
@@ -127,21 +127,21 @@ public class TeamController {
                     responseCode = "404",
                     description = "Team member not found",
                     content = @Content(
-                            schema = @Schema(implementation = ResponseDto.class)
+                            schema = @Schema(implementation = TeamsResponseDto.class)
                     )
             )
     })
     @DeleteMapping("/{cardId}/remove")
-    public ResponseEntity<ResponseDto> removeMember(
+    public ResponseEntity<TeamsResponseDto> removeMember(
             @PathVariable Long cardId,
             @RequestParam Long userId) {
         boolean removed = teamService.removeMember(cardId, userId);
         if (removed) {
             return ResponseEntity.ok(
-                    new ResponseDto(TeamConstants.STATUS_200, TeamConstants.MESSAGE_200));
+                    new TeamsResponseDto(TeamConstants.STATUS_200, TeamConstants.MESSAGE_200));
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    new ResponseDto(TeamConstants.STATUS_500, TeamConstants.MESSAGE_500));
+                    new TeamsResponseDto(TeamConstants.STATUS_500, TeamConstants.MESSAGE_500));
         }
     }
 

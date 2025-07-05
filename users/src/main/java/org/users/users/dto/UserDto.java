@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -54,5 +55,15 @@ public class UserDto
             description = "Roles of the user"
     )
     private Set<RoleDto> roles;
+
+    @Schema(
+            description = "Users teams"
+    )
+    private TeamMemberResponseDto teamMember;
+
+    @Schema(
+            description = "Users cards"
+    )
+    private List<CardResponseDto> cards;
 
 }

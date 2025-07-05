@@ -23,6 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(
         name = "CRUD REST API for Cards",
         description = "Operations for managing project cards"
@@ -33,7 +35,7 @@ import org.springframework.web.bind.annotation.*;
 public class CardsController {
 
     private final ICardsService cardsService;
-    
+
     @Value("${build.version}")
     private String buildVersion;
 
@@ -77,9 +79,23 @@ public class CardsController {
             responseCode = "200",
             description = "HTTP Status OK"
     )
-    @GetMapping("/{cardId}")
-    public ResponseEntity<CardResponseDto> getCardById(@PathVariable Long cardId) {
+    @GetMapping("/fetch")
+    public ResponseEntity<CardResponseDto> getCardById(@RequestParam Long cardId) {
         CardResponseDto cardResponseDto = cardsService.getCardById(cardId);
+        return ResponseEntity.ok(cardResponseDto);
+    }
+
+    @Operation(
+            summary = "Get Cards by user ID REST API",
+            description = "Get a cards by user ID"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "HTTP Status OK"
+    )
+    @GetMapping("/fetchByUser")
+    public ResponseEntity<List<CardResponseDto>> getCardsByUserId(@RequestParam Long userId) {
+        List<CardResponseDto> cardResponseDto = cardsService.getCardsByUserId(userId);
         return ResponseEntity.ok(cardResponseDto);
     }
 
