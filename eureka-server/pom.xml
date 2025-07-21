@@ -11,7 +11,7 @@
     </parent>
     
     <groupId>com.teamup</groupId>
-    <artifactId>eureka-server</artifactId>
+    <artifactId>eurekaserver</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>eureka-server</name>
     <description>Eureka Server for TeamUp Microservices</description>
@@ -58,10 +58,15 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.4.3</version>
                 <configuration>
-                    <image>
-                        <name>mykyta2/eureka-server</name>
-                    </image>
+                    <to>
+                        <image>mykyta2/eureka-server:s1</image>
+                    </to>
                 </configuration>
             </plugin>
         </plugins>

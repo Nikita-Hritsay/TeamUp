@@ -9,3 +9,6 @@ eureka:
     fetchRegistry: false
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:8071/eureka/
+
+build:
+  version: "def eureka: 1.0.0"

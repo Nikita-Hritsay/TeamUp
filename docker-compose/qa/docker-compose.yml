@@ -75,6 +75,32 @@ services:
       file: common-config.yml
       service: microservice-base-config
 
+  eurekaserver:
+    image: "mykyta2/eureka-server:s1"
+    container_name: eureka-server-ms
+    ports:
+      - "8070:8070"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8070/actuator/health/readiness" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      usersdb:
+        condition: service_healthy
+      cardsdb:
+        condition: service_healthy
+      teamsdb:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+    environment:
+      SPRING_APPLICATION_NAME: "eurekaserver"
+
   teams:
     image: "mykyta2/teams:s1"
     container_name: teams-ms
@@ -82,9 +108,11 @@ services:
       - "8081:8081"
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eureka-config
     depends_on:
       config-server:
+        condition: service_healthy
+      eurekaserver:
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "teams"
@@ -97,9 +125,11 @@ services:
       - "8082:8082"
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eureka-config
     depends_on:
       config-server:
+        condition: service_healthy
+      eurekaserver:
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "cards"
@@ -112,9 +142,11 @@ services:
       - "8083:8083"
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eureka-config
     depends_on:
       config-server:
+        condition: service_healthy
+      eurekaserver:
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "users"
