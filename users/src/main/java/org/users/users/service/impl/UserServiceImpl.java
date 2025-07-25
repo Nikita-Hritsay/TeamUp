@@ -1,7 +1,8 @@
 package org.users.users.service.impl;
 
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.users.users.dto.CardResponseDto;
 import org.users.users.dto.UserDto;
 import org.users.users.entity.Role;
@@ -12,8 +13,6 @@ import org.users.users.mapper.UserMapper;
 import org.users.users.repository.RoleRepository;
 import org.users.users.repository.UserRepository;
 import org.users.users.service.IUserService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.users.users.service.client.CardsFeignClient;
 import org.users.users.service.client.TeamsFeignClient;
 
@@ -31,8 +30,6 @@ public class UserServiceImpl implements IUserService {
     private UserRepository userRepository;
 
     private CardsFeignClient cardsFeignClient;
-
-    private TeamsFeignClient teamsFeignClient;
 
     @Override
     public void createUser(UserDto userDto) {

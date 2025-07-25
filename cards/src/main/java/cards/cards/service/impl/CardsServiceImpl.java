@@ -2,16 +2,19 @@ package cards.cards.service.impl;
 
 import cards.cards.dto.CardRequestDto;
 import cards.cards.dto.CardResponseDto;
+import cards.cards.dto.UserDto;
 import cards.cards.entity.Card;
 import cards.cards.exception.ResourceNotFoundException;
 import cards.cards.mapper.CardMapper;
 import cards.cards.repository.CardsRepository;
 import cards.cards.service.ICardsService;
+import cards.cards.service.client.UsersFeignClient;
 import cards.cards.specification.CardSpecification;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +27,14 @@ public class CardsServiceImpl implements ICardsService {
 
     private final CardsRepository cardsRepository;
 
+    private final UsersFeignClient usersFeignClient;
+
     @Override
     public CardResponseDto createCard(CardRequestDto cardRequestDto) {
+        ResponseEntity<UserDto> userDtoResponseEntity = usersFeignClient.fetchUser(cardRequestDto.getOwnerId());
+        if (userDtoResponseEntity.getStatusCode().is4xxClientError()) {
+            throw new ResourceNotFoundException("User", "id", cardRequestDto.getOwnerId().toString());
+        }
         Card card = CardMapper.mapToCard(cardRequestDto, new Card());
         Card savedCard = cardsRepository.save(card);
         return CardMapper.mapToCardResponseDto(savedCard);
