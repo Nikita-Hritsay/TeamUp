@@ -9,10 +9,10 @@
 		<relativePath/>
 	</parent>
 	<groupId>cloudserver</groupId>
-	<artifactId>2config-server</artifactId>
+	<artifactId>config-server</artifactId>
 	<version>s1</version>
 	<name>mykyta2/config-server</name>
-	<description>mykyta/2config-server</description>
+	<description>mykyta/config-server</description>
 
 	<properties>
 		<java.version>21</java.version>

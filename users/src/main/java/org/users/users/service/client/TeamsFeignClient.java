@@ -16,4 +16,6 @@ public interface TeamsFeignClient {
     @GetMapping(value = "/{cardId}", consumes = "application/json")
     public ResponseEntity<List<TeamMemberResponseDto>> getTeamMembers(@PathVariable Long cardId) ;
 
+
+    // add method to fetch teams where user is present
 }

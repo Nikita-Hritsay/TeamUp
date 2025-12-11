@@ -1,0 +1,4 @@
+- fix the Docker compose
+- make Teams work like a Teams for a specific Card with multiple Users
+- add security for a gateway server
+- add feign client request for User service to retrieve teams where user is present

@@ -51,4 +51,12 @@ public interface ITeamService {
      * @return list of team members
      */
     List<TeamMemberResponseDto> getTeamMembers(Long cardId);
+
+    /**
+     * Gets all team members for a specific project
+     *
+     * @param cardId the ID of the card/project
+     * @return list of team members
+     */
+    List<TeamMemberResponseDto> getTeamsByMember(Long userId);
 }
