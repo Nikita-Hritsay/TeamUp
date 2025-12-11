@@ -1,11 +1,12 @@
 package org.users.users.service;
 
 import org.users.users.dto.UserDto;
+import org.users.users.entity.User;
 
 public interface IUserService
 {
 
-    void createUser(UserDto userDto);
+    User createUser(UserDto userDto);
 
     UserDto fetchUser(Long userId);
 

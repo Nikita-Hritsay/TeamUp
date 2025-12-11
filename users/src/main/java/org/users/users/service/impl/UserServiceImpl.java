@@ -14,7 +14,6 @@ import org.users.users.repository.RoleRepository;
 import org.users.users.repository.UserRepository;
 import org.users.users.service.IUserService;
 import org.users.users.service.client.CardsFeignClient;
-import org.users.users.service.client.TeamsFeignClient;
 
 import java.util.List;
 import java.util.Objects;
@@ -32,7 +31,7 @@ public class UserServiceImpl implements IUserService {
     private CardsFeignClient cardsFeignClient;
 
     @Override
-    public void createUser(UserDto userDto) {
+    public User createUser(UserDto userDto) {
         User user = UserMapper.mapToUser(userDto, new User());
         Optional<User> optionalUser = userRepository.findByMobileNumber(
                 userDto.getMobileNumber());
@@ -41,15 +40,14 @@ public class UserServiceImpl implements IUserService {
                     "User already exists with given mobile number: " + userDto.getMobileNumber());
         }
         createNewUserWithDefaultRole(user);
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
-    private Role createNewUserWithDefaultRole(User user) {
+    private void createNewUserWithDefaultRole(User user) {
         Role userRole = roleRepository.findByRoleName("USER")
                 .orElseGet(() -> roleRepository.save(new Role().withRoleName("USER")));
 
         user.setRoles(Set.of(userRole));
-        return userRole;
     }
 
     @Override
@@ -65,8 +63,6 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public boolean updateUser(UserDto userDto) {
-        boolean updated = false;
-
         User user = userRepository.findById(userDto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "User", "id", userDto.getId().toString()));
@@ -85,24 +81,20 @@ public class UserServiceImpl implements IUserService {
         user.setMobileNumber(userDto.getMobileNumber());
 
         userRepository.save(user);
-        updated = true;
 
-        return updated;
+        return true;
     }
 
     @Override
     @Transactional
     public boolean deleteUser(Long userId) {
-        boolean deleted = false;
         User user = userRepository.findById(userId)
                 .orElseThrow(
                         () -> new ResourceNotFoundException("User", "id",
                                 userId.toString())
                 );
         userRepository.delete(user);
-        deleted = true;
-
-        return deleted;
+        return true;
     }
 
 }

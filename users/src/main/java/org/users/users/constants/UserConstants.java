@@ -3,7 +3,6 @@ package org.users.users.constants;
 public class UserConstants
 {
 
-
     private UserConstants() {
         // restrict instantiation
     }

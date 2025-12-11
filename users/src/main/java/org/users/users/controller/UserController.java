@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -26,6 +25,7 @@ import org.users.users.constants.UserConstants;
 import org.users.users.dto.ErrorResponseDto;
 import org.users.users.dto.ResponseDto;
 import org.users.users.dto.UserDto;
+import org.users.users.entity.User;
 import org.users.users.service.IUserService;
 
 @Tag(
@@ -49,9 +49,18 @@ public class UserController
     @Value("${build.version}")
     private String buildVersion;
 
-    @ApiResponse(
-            responseCode = "201",
-            description = "HTTP Status CREATED"
+    @ApiResponses({
+        @ApiResponse(
+                responseCode = "201",
+                description = "HTTP Status CREATED"
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "HTTP Status INTERNAL_SERVER_ERROR",
+                content = @Content(
+                        schema = @Schema(implementation = ErrorResponseDto.class)
+                )
+        )}
     )
     @Operation(
             summary = "Create user REST API",
@@ -60,7 +69,11 @@ public class UserController
     public ResponseEntity<ResponseDto> createUser(
             @Valid @RequestBody UserDto userDto)
     {
-        userService.createUser(userDto);
+        User user = userService.createUser(userDto);
+        if (user == null)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new ResponseDto(UserConstants.STATUS_500,
+                            UserConstants.MESSAGE_500));
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ResponseDto(UserConstants.STATUS_201,
@@ -68,22 +81,21 @@ public class UserController
     }
 
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "HTTP Status OK"
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "HTTP Status INTERNAL_SERVER_ERROR",
-                    content = @Content(
-                            schema = @Schema(implementation = ErrorResponseDto.class)
-                    )
+        @ApiResponse(
+            responseCode = "200",
+            description = "HTTP Status OK"
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "HTTP Status INTERNAL_SERVER_ERROR",
+            content = @Content(
+                    schema = @Schema(implementation = ErrorResponseDto.class)
             )
-    }
+        )}
     )
     @Operation(
             summary = "Update User REST API",
-            description = "Update new User REST API")
+            description = "Update User REST API")
     @PutMapping("/update")
     public ResponseEntity<ResponseDto> updateUser(
             @Valid @RequestBody UserDto userDto)
@@ -93,10 +105,9 @@ public class UserController
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseDto(UserConstants.STATUS_200,
                             UserConstants.MESSAGE_200));
-        else
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    new ResponseDto(UserConstants.STATUS_500,
-                            UserConstants.MESSAGE_500));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                new ResponseDto(UserConstants.STATUS_500,
+                        UserConstants.MESSAGE_500));
     }
 
     @ApiResponse(
@@ -140,10 +151,9 @@ public class UserController
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseDto(UserConstants.STATUS_200,
                             UserConstants.MESSAGE_200));
-        else
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    new ResponseDto(UserConstants.STATUS_500,
-                            UserConstants.MESSAGE_500));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                new ResponseDto(UserConstants.STATUS_500,
+                        UserConstants.MESSAGE_500));
     }
 
     @Operation(
