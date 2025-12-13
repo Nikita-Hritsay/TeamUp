@@ -8,7 +8,7 @@ import org.users.users.dto.CardResponseDto;
 
 import java.util.List;
 
-@FeignClient("cards")
+@FeignClient("teams")
 public interface CardsFeignClient {
 
     @GetMapping("/api/v1/fetchByUser")
