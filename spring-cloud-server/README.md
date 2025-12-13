@@ -32,7 +32,6 @@ http://localhost:8071/{service-name}/{profile}
 Example URLs:
 - `http://localhost:8071/users/default`
 - `http://localhost:8071/teams/docker`
-- `http://localhost:8071/cards/production`
 
 ## Server Configuration
 

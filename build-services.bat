@@ -1,10 +1,5 @@
 @echo off
 
-echo Building cards service...
-cd cards
-call mvn compile jib:build
-cd ..
-
 echo Building users service...
 cd users
 call mvn compile jib:build

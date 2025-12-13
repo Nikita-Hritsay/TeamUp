@@ -17,24 +17,6 @@ services:
       file: common-config.yml
       service: network-deploy-service
 
-  cardsdb:
-    image: mysql
-    container_name: cardsdb
-    ports:
-      - 3307:3306
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      timeout: 10s
-      retries: 10
-      interval: 10s
-      start_period: 10s
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cardsdb
-    extends:
-      file: common-config.yml
-      service: network-deploy-service
-
   teamsdb:
     image: mysql
     container_name: teamsdb
@@ -67,8 +49,6 @@ services:
     depends_on:
       usersdb:
         condition: service_healthy
-      cardsdb:
-        condition: service_healthy
       teamsdb:
         condition: service_healthy
     extends:
@@ -88,8 +68,6 @@ services:
       start_period: 10s
     depends_on:
       usersdb:
-        condition: service_healthy
-      cardsdb:
         condition: service_healthy
       teamsdb:
         condition: service_healthy
@@ -117,23 +95,6 @@ services:
     environment:
       SPRING_APPLICATION_NAME: "teams"
       SPRING_DATASOURCE_URL: "jdbc:mysql://teamsdb:3306/teamsdb"
-
-  cards:
-    image: "mykyta2/cards:s1"
-    container_name: cards-ms
-    ports:
-      - "8082:8082"
-    extends:
-      file: common-config.yml
-      service: microservice-eureka-config
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eurekaserver:
-        condition: service_healthy
-    environment:
-      SPRING_APPLICATION_NAME: "cards"
-      SPRING_DATASOURCE_URL: "jdbc:mysql://cardsdb:3306/cardsdb"
 
   users:
     image: "mykyta2/users:s1"
