@@ -1,16 +1,6 @@
 @echo off
 echo Starting MySQL containers if not already running...
 
-REM ====== cardsdb ======
-docker ps -a --filter "name=cardsdb" --filter "status=running" --format "{{.Names}}" | findstr /i "^cardsdb$" >nul
-if errorlevel 1 (
-    docker rm -f cardsdb >nul 2>&1
-    docker run -d -p 3307:3306 --name cardsdb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=cardsdb mysql
-    echo Started cardsdb
-) else (
-    echo cardsdb already running
-)
-
 REM ====== teamsdb ======
 docker ps -a --filter "name=teamsdb" --filter "status=running" --format "{{.Names}}" | findstr /i "^teamsdb$" >nul
 if errorlevel 1 (
