@@ -15,9 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import teams.teams.constants.TeamConstants;
-import teams.teams.dto.TeamsResponseDto;
-import teams.teams.dto.TeamMemberRequestDto;
-import teams.teams.dto.TeamMemberResponseDto;
+import teams.teams.dto.*;
 import teams.teams.service.ITeamService;
 
 import java.util.List;
@@ -32,7 +30,7 @@ import java.util.List;
 public class TeamController {
 
     private final ITeamService teamService;
-    
+
     @Value("${build.version}")
     private String buildVersion;
 
@@ -42,14 +40,31 @@ public class TeamController {
     }
 
     @Operation(
-        summary = "Get Build Version",
-        description = "Get the current build version of the service"
+            summary = "Get Build Version",
+            description = "Get the current build version of the service"
     )
     @GetMapping("/build-version")
     public ResponseEntity<String> getBuildVersion() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(buildVersion);
+    }
+
+    @Operation(
+            summary = "Create Team REST API",
+            description = "Submit a request to create a team/project"
+    )
+    @ApiResponse(
+            responseCode = "201",
+            description = "HTTP Status CREATED"
+    )
+    @PostMapping("/create")
+    public ResponseEntity<TeamsResponseDto> createTeam(
+            @Valid @RequestBody TeamRequestDto teamRequestDto) {
+        teamService.createTeam(teamRequestDto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new TeamsResponseDto(TeamConstants.STATUS_201, TeamConstants.MESSAGE_201));
     }
 
     @Operation(
@@ -60,11 +75,10 @@ public class TeamController {
             responseCode = "201",
             description = "HTTP Status CREATED"
     )
-    @PostMapping("/{cardId}/join")
+    @PostMapping("/join")
     public ResponseEntity<TeamsResponseDto> joinTeam(
-            @PathVariable Long cardId,
             @Valid @RequestBody TeamMemberRequestDto teamMemberRequestDto) {
-        teamService.joinTeam(cardId, teamMemberRequestDto);
+        teamService.joinTeam(teamMemberRequestDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new TeamsResponseDto(TeamConstants.STATUS_201, TeamConstants.MESSAGE_201));
@@ -157,5 +171,19 @@ public class TeamController {
     public ResponseEntity<List<TeamMemberResponseDto>> getTeamMembers(@PathVariable Long cardId) {
         List<TeamMemberResponseDto> teamMembers = teamService.getTeamMembers(cardId);
         return ResponseEntity.ok(teamMembers);
+    }
+
+    @Operation(
+            summary = "Get Team Info REST API",
+            description = "Get info of a specific team"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "HTTP Status OK"
+    )
+    @GetMapping("/fetch")
+    public ResponseEntity<TeamResponseDTO> fetch(@RequestParam Long teamId) {
+        TeamResponseDTO teamResponseDto = teamService.fetchTeam(teamId);
+        return ResponseEntity.ok(teamResponseDto);
     }
 }

@@ -27,4 +27,13 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long>, J
      * @return optional containing the team member if found
      */
     Optional<TeamMember> findByCardIdAndUserId(Long cardId, Long userId);
+
+    /**
+     * Find a team member by team Id and user ID
+     *
+     * @param teamId the ID of the card
+     * @param userId the ID of the user
+     * @return optional containing the team member if found
+     */
+    Optional<TeamMember> findByTeamIdAndUserId(Long teamId, Long userId);
 }

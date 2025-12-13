@@ -29,6 +29,12 @@ public class TeamMemberResponseDto {
     private Long cardId;
 
     @Schema(
+            description = "ID of the team",
+            example = "1"
+    )
+    private Long teamId;
+
+    @Schema(
             description = "ID of the user", 
             example = "1"
     )

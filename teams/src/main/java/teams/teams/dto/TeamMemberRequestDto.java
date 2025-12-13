@@ -29,4 +29,17 @@ public class TeamMemberRequestDto {
     )
     @NotNull(message = "Role cannot be null")
     private String role;
+
+    @Schema(
+            description = "Team Id where user is added",
+            example = "1"
+    )
+    @NotNull(message = "Role cannot be null")
+    private Long teamId;
+
+    @Schema(
+            description = "Card Id from which user added himself",
+            example = "1"
+    )
+    private Long cardId;
 }

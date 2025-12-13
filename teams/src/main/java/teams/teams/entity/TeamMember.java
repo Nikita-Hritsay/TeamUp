@@ -7,7 +7,7 @@ import teams.teams.constants.TeamConstants;
 
 import java.time.LocalDateTime;
 
-@Entity(name = "team_members")
+@Entity(name = "team_member")
 @Getter
 @Setter
 @ToString
@@ -15,13 +15,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class TeamMember extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @NotNull(message = "Team ID cannot be null")
+    @Column(name = "team_id", nullable = false)
+    private Long teamId;
 
-    @NotNull(message = "Card ID cannot be null")
-    @Column(name = "card_id", nullable = false)
+    @Column(name = "card_id")
     private Long cardId;
 
     @NotNull(message = "User ID cannot be null")

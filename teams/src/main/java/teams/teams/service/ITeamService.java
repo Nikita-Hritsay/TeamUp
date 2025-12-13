@@ -1,7 +1,7 @@
 package teams.teams.service;
 
-import teams.teams.dto.TeamMemberRequestDto;
-import teams.teams.dto.TeamMemberResponseDto;
+import teams.teams.dto.*;
+import teams.teams.entity.Team;
 
 import java.util.List;
 
@@ -10,11 +10,16 @@ public interface ITeamService {
     /**
      * Processes a request from a user to join a team/project
      * 
-     * @param cardId the ID of the card/project
      * @param teamMemberRequestDto the request data containing user ID and role
      * @return the created team member
      */
-    TeamMemberResponseDto joinTeam(Long cardId, TeamMemberRequestDto teamMemberRequestDto);
+    TeamMemberResponseDto joinTeam(TeamMemberRequestDto teamMemberRequestDto);
+
+    /**
+     * Processes a request from a user to create a team
+     *
+     */
+    Team createTeam(TeamRequestDto teamMemberRequestDto);
 
     /**
      * Invites a user to join a team/project
@@ -59,4 +64,6 @@ public interface ITeamService {
      * @return list of team members
      */
     List<TeamMemberResponseDto> getTeamsByMember(Long userId);
+
+    TeamResponseDTO fetchTeam(Long teamId);
 }
