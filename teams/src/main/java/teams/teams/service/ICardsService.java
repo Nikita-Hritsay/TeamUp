@@ -1,9 +1,10 @@
-package teams.teams.cards.service;
+package teams.teams.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import teams.teams.cards.dto.CardRequestDto;
-import teams.teams.cards.dto.CardResponseDto;
+import teams.teams.dto.cards.CardRequestDto;
+import teams.teams.dto.cards.CardResponseDto;
+import teams.teams.entity.Card;
 
 import java.util.List;
 
@@ -51,20 +52,9 @@ public interface ICardsService {
     boolean deleteCard(Long cardId);
 
     /**
-     * Retrieves all cards with pagination
+     * Retrieves all cards
      *
-     * @param pageable pagination information
      * @return a page of cards
      */
-    Page<CardResponseDto> getAllCards(Pageable pageable);
-
-    /**
-     * Retrieves cards filtered by ownerId and/or title with pagination
-     *
-     * @param ownerId the owner ID to filter by (optional)
-     * @param title the title to filter by (optional)
-     * @param pageable pagination information
-     * @return a page of filtered cards
-     */
-    Page<CardResponseDto> getFilteredCards(Long ownerId, String title, Pageable pageable);
+    List<Card> getAllCards();
 }

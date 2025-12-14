@@ -1,4 +1,4 @@
-package teams.teams.cards.service.impl;
+package teams.teams.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -7,15 +7,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import teams.teams.cards.dto.CardRequestDto;
-import teams.teams.cards.dto.CardResponseDto;
-import teams.teams.cards.dto.UserDto;
-import teams.teams.cards.entity.Card;
-import teams.teams.cards.mapper.CardMapper;
-import teams.teams.cards.repository.CardsRepository;
-import teams.teams.cards.service.ICardsService;
-import teams.teams.cards.service.client.UsersFeignClient;
-import teams.teams.cards.specification.CardSpecification;
+import teams.teams.dto.UserDto;
+import teams.teams.dto.cards.CardRequestDto;
+import teams.teams.dto.cards.CardResponseDto;
+import teams.teams.entity.Card;
+import teams.teams.mapper.CardMapper;
+import teams.teams.repository.CardsRepository;
+import teams.teams.service.ICardsService;
 import teams.teams.exception.ResourceNotFoundException;
 
 import java.util.List;
@@ -77,20 +75,7 @@ public class CardsServiceImpl implements ICardsService {
     }
 
     @Override
-    public Page<CardResponseDto> getAllCards(Pageable pageable) {
-        Page<Card> cardsPage = cardsRepository.findAll(pageable);
-        return cardsPage.map(CardMapper::mapToCardResponseDto);
-    }
-
-    @Override
-    public Page<CardResponseDto> getFilteredCards(Long ownerId, String title,
-                                                  Pageable pageable) {
-        Specification<Card> spec = CardSpecification.where(
-                CardSpecification.hasOwnerId(ownerId),
-                CardSpecification.titleContains(title)
-        );
-
-        Page<Card> filteredCards = cardsRepository.findAll(spec, pageable);
-        return filteredCards.map(CardMapper::mapToCardResponseDto);
+    public List<Card> getAllCards() {
+        return cardsRepository.findAll();
     }
 }

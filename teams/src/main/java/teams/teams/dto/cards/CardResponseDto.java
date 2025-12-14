@@ -1,4 +1,4 @@
-package teams.teams.cards.dto;
+package teams.teams.dto.cards;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

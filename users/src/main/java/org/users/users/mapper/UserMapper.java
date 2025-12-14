@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class UserMapper
 {
 
-    public static UserDto mapToUserDto(User user, UserDto userDto, List<CardResponseDto> userCards)
+    public static UserDto mapToUserDto(User user, UserDto userDto)
     {
         userDto.setId(user.getId());
         userDto.setEmail(user.getEmail());
@@ -30,7 +30,6 @@ public class UserMapper
                     .collect(Collectors.toSet());
             userDto.setRoles(roleDtos);
         }
-        userDto.setCards(userCards);
 
         return userDto;
     }

@@ -1,4 +1,4 @@
-package teams.teams.cards.entity;
+package teams.teams.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;

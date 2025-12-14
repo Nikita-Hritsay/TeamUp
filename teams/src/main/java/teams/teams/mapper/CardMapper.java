@@ -1,8 +1,8 @@
-package teams.teams.cards.mapper;
+package teams.teams.mapper;
 
-import teams.teams.cards.dto.CardRequestDto;
-import teams.teams.cards.dto.CardResponseDto;
-import teams.teams.cards.entity.Card;
+import teams.teams.dto.cards.CardRequestDto;
+import teams.teams.dto.cards.CardResponseDto;
+import teams.teams.entity.Card;
 
 import java.util.List;
 import java.util.stream.Collectors;

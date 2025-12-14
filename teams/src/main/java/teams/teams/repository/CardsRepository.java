@@ -1,9 +1,9 @@
-package teams.teams.cards.repository;
+package teams.teams.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
-import teams.teams.cards.entity.Card;
+import teams.teams.entity.Card;
 
 import java.util.List;
 

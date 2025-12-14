@@ -1,6 +1,9 @@
 package teams.teams.service;
 
-import teams.teams.dto.*;
+import teams.teams.dto.teams.TeamMemberRequestDto;
+import teams.teams.dto.teams.TeamMemberResponseDto;
+import teams.teams.dto.teams.TeamRequestDto;
+import teams.teams.dto.teams.TeamResponseDTO;
 import teams.teams.entity.Team;
 
 import java.util.List;

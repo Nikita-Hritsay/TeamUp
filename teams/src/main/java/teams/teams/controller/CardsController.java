@@ -1,4 +1,4 @@
-package teams.teams.cards.controller;
+package teams.teams.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -9,19 +9,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import teams.teams.cards.constants.CardConstants;
-import teams.teams.cards.dto.CardRequestDto;
-import teams.teams.cards.dto.CardResponseDto;
-import teams.teams.cards.dto.ResponseDto;
-import teams.teams.cards.service.ICardsService;
+import teams.teams.constants.Constants;
+import teams.teams.dto.ResponseDto;
+import teams.teams.dto.cards.CardRequestDto;
+import teams.teams.dto.cards.CardResponseDto;
+import teams.teams.entity.Card;
+import teams.teams.service.ICardsService;
 
 import java.util.List;
 
@@ -30,7 +28,7 @@ import java.util.List;
         description = "Operations for managing project cards"
 )
 @RestController
-@RequestMapping(path = "/api/v1", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(path = "/api/v1/cards", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Validated
 public class CardsController {
 
@@ -48,7 +46,7 @@ public class CardsController {
             summary = "Get Build Version",
             description = "Get the current build version of the service"
     )
-    @GetMapping("/cards/build-version")
+    @GetMapping("/build-version")
     public ResponseEntity<String> getBuildVersion() {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -68,7 +66,7 @@ public class CardsController {
         cardsService.createCard(cardRequestDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new ResponseDto(CardConstants.STATUS_201, CardConstants.MESSAGE_201));
+                .body(new ResponseDto(Constants.STATUS_201, Constants.MESSAGE_201));
     }
 
     @Operation(
@@ -108,22 +106,9 @@ public class CardsController {
             description = "HTTP Status OK"
     )
     @GetMapping
-    public ResponseEntity<Page<CardResponseDto>> getAllCards(
-            @RequestParam(required = false) Long ownerId,
-            @RequestParam(required = false) String title,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-
-        // If filtering parameters are provided, use filtered search
-        if (ownerId != null || (title != null && !title.isEmpty())) {
-            Page<CardResponseDto> filteredCards = cardsService.getFilteredCards(ownerId, title, pageable);
-            return ResponseEntity.ok(filteredCards);
-        }
-
-        // Otherwise, get all cards
-        Page<CardResponseDto> cards = cardsService.getAllCards(pageable);
-        return ResponseEntity.ok(cards);
+    public ResponseEntity<List<Card>> getAllCards()
+    {
+        return ResponseEntity.ok(cardsService.getAllCards());
     }
 
     @Operation(
@@ -187,10 +172,10 @@ public class CardsController {
         boolean deleted = cardsService.deleteCard(cardId);
         if (deleted) {
             return ResponseEntity.ok(
-                    new ResponseDto(CardConstants.STATUS_200, CardConstants.MESSAGE_200));
+                    new ResponseDto(Constants.STATUS_200, Constants.MESSAGE_200));
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    new ResponseDto(CardConstants.STATUS_500, CardConstants.MESSAGE_500));
+                    new ResponseDto(Constants.STATUS_500, Constants.MESSAGE_500));
         }
     }
 }

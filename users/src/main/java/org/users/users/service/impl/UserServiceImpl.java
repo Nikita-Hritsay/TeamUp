@@ -13,7 +13,6 @@ import org.users.users.mapper.UserMapper;
 import org.users.users.repository.RoleRepository;
 import org.users.users.repository.UserRepository;
 import org.users.users.service.IUserService;
-import org.users.users.service.client.CardsFeignClient;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,8 +26,6 @@ public class UserServiceImpl implements IUserService {
     private RoleRepository roleRepository;
 
     private UserRepository userRepository;
-
-    private CardsFeignClient cardsFeignClient;
 
     @Override
     public User createUser(UserDto userDto) {
@@ -56,9 +53,7 @@ public class UserServiceImpl implements IUserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id",
                         id.toString()));
 
-        List<CardResponseDto> userCards = cardsFeignClient.getCardsByUserId(user.getId()).getBody();
-
-        return UserMapper.mapToUserDto(user, new UserDto(), userCards);
+        return UserMapper.mapToUserDto(user, new UserDto());
     }
 
     @Override

@@ -1,8 +1,8 @@
 package teams.teams.mapper;
 
-import teams.teams.dto.TeamMemberRequestDto;
-import teams.teams.dto.TeamMemberResponseDto;
-import teams.teams.dto.TeamResponseDTO;
+import teams.teams.dto.teams.TeamMemberRequestDto;
+import teams.teams.dto.teams.TeamMemberResponseDto;
+import teams.teams.dto.teams.TeamResponseDTO;
 import teams.teams.entity.Team;
 import teams.teams.entity.TeamMember;
 

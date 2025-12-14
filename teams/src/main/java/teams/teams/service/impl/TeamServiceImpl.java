@@ -3,8 +3,11 @@ package teams.teams.service.impl;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import teams.teams.constants.TeamConstants;
-import teams.teams.dto.*;
+import teams.teams.constants.Constants;
+import teams.teams.dto.teams.TeamMemberRequestDto;
+import teams.teams.dto.teams.TeamMemberResponseDto;
+import teams.teams.dto.teams.TeamRequestDto;
+import teams.teams.dto.teams.TeamResponseDTO;
 import teams.teams.entity.Team;
 import teams.teams.entity.TeamMember;
 import teams.teams.exception.ResourceNotFoundException;
@@ -13,7 +16,6 @@ import teams.teams.repository.TeamMemberRepository;
 import teams.teams.repository.TeamRepository;
 import teams.teams.service.ITeamService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,7 +37,7 @@ public class TeamServiceImpl implements ITeamService {
 
         // Create a new team member with PENDING status
         TeamMember teamMember = TeamMapper.mapToTeamMember(teamMemberRequestDto, new TeamMember());
-        teamMember.setStatus(TeamConstants.STATUS_PENDING);
+        teamMember.setStatus(Constants.STATUS_PENDING);
         
         TeamMember savedMember = teamMemberRepository.save(teamMember);
         return TeamMapper.mapToTeamMemberResponseDto(savedMember);
@@ -60,7 +62,7 @@ public class TeamServiceImpl implements ITeamService {
 
         // Create a new team member with PENDING status
         TeamMember teamMember = TeamMapper.mapToTeamMember(teamMemberRequestDto, new TeamMember());
-        teamMember.setStatus(TeamConstants.STATUS_PENDING);
+        teamMember.setStatus(Constants.STATUS_PENDING);
         
         TeamMember savedMember = teamMemberRepository.save(teamMember);
         return TeamMapper.mapToTeamMemberResponseDto(savedMember);
@@ -73,9 +75,9 @@ public class TeamServiceImpl implements ITeamService {
                 .orElseThrow(() -> new ResourceNotFoundException("TeamMember", "teamId and userId",
                         teamId + " and " + userId));
 
-        if (TeamConstants.STATUS_JOINED.equals(status)) {
+        if (Constants.STATUS_JOINED.equals(status)) {
             teamMember.join(); // Sets status to JOINED and updates joinedAt
-        } else if (TeamConstants.STATUS_REJECTED.equals(status)) {
+        } else if (Constants.STATUS_REJECTED.equals(status)) {
             teamMember.reject(); // Sets status to REJECTED
         } else {
             throw new IllegalArgumentException("Invalid status: " + status);

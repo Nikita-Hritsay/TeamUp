@@ -3,7 +3,7 @@ package teams.teams.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import teams.teams.constants.TeamConstants;
+import teams.teams.constants.Constants;
 
 import java.time.LocalDateTime;
 
@@ -41,7 +41,7 @@ public class TeamMember extends BaseEntity {
      * Updates the status to JOINED and sets the joinedAt timestamp
      */
     public void join() {
-        this.status = TeamConstants.STATUS_JOINED;
+        this.status = Constants.STATUS_JOINED;
         this.joinedAt = LocalDateTime.now();
     }
 
@@ -49,6 +49,6 @@ public class TeamMember extends BaseEntity {
      * Updates the status to REJECTED
      */
     public void reject() {
-        this.status = TeamConstants.STATUS_REJECTED;
+        this.status = Constants.STATUS_REJECTED;
     }
 }
