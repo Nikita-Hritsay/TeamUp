@@ -29,4 +29,8 @@ public class Team extends BaseEntity {
     )
     private List<TeamMember> teamMembers;
 
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Card> cards;
+
 }
