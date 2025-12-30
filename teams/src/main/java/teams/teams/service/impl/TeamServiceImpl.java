@@ -10,12 +10,11 @@ import teams.teams.entity.Team;
 import teams.teams.entity.TeamMember;
 import teams.teams.exception.ResourceNotFoundException;
 import teams.teams.mapper.TeamMapper;
-import teams.teams.cards.repository.CardsRepository;
+import teams.teams.repository.CardsRepository;
 import teams.teams.repository.TeamMemberRepository;
 import teams.teams.repository.TeamRepository;
 import teams.teams.service.ITeamService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 

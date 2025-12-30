@@ -1,7 +1,7 @@
-package teams.teams.cards.mapper;
+package teams.teams.mapper;
 
-import teams.teams.cards.dto.CardRequestDto;
-import teams.teams.cards.dto.CardResponseDto;
+import teams.teams.dto.CardRequestDto;
+import teams.teams.dto.CardResponseDto;
 import teams.teams.entity.Card;
 import teams.teams.entity.Team;
 

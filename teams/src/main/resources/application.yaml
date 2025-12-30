@@ -19,7 +19,7 @@ spring:
       mode: always
 
   config:
-    import: "optional:configserver:http://localhost:8071/"
+    import: "optional:configserver:http://config-server:8071/"
 
 management:
   endpoints:

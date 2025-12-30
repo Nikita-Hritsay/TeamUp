@@ -1,4 +1,4 @@
-package teams.teams.cards.constants;
+package teams.teams.constants;
 
 public class CardConstants {
 

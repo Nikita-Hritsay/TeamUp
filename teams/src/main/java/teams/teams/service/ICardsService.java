@@ -1,9 +1,9 @@
-package teams.teams.cards.service;
+package teams.teams.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import teams.teams.cards.dto.CardRequestDto;
-import teams.teams.cards.dto.CardResponseDto;
+import teams.teams.dto.CardRequestDto;
+import teams.teams.dto.CardResponseDto;
 
 import java.util.List;
 

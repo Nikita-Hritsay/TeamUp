@@ -1,4 +1,4 @@
-package teams.teams.cards.specification;
+package teams.teams.specification;
 
 import org.springframework.data.jpa.domain.Specification;
 import teams.teams.entity.Card;

@@ -1,4 +1,4 @@
-package teams.teams.cards.dto;
+package teams.teams.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import teams.teams.dto.TeamMemberResponseDto;
 
 import java.util.List;
 import java.util.Set;

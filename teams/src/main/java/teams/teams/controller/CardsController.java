@@ -1,4 +1,4 @@
-package teams.teams.cards.controller;
+package teams.teams.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,11 +17,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import teams.teams.cards.constants.CardConstants;
-import teams.teams.cards.dto.CardRequestDto;
-import teams.teams.cards.dto.CardResponseDto;
-import teams.teams.cards.dto.ResponseDto;
-import teams.teams.cards.service.ICardsService;
+import teams.teams.constants.CardConstants;
+import teams.teams.dto.CardRequestDto;
+import teams.teams.dto.CardResponseDto;
+import teams.teams.dto.ResponseDto;
+import teams.teams.service.ICardsService;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ import java.util.List;
         description = "Operations for managing project cards"
 )
 @RestController
-@RequestMapping(path = "/api/v1", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(path = "/api/v1/cards", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Validated
 public class CardsController {
 
@@ -48,7 +48,7 @@ public class CardsController {
             summary = "Get Build Version",
             description = "Get the current build version of the service"
     )
-    @GetMapping("/cards/build-version")
+    @GetMapping("/build-version")
     public ResponseEntity<String> getBuildVersion() {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -150,6 +150,7 @@ public class CardsController {
                     )
             )
     })
+
     @PutMapping("/{cardId}")
     public ResponseEntity<CardResponseDto> updateCard(
             @PathVariable Long cardId,
@@ -182,6 +183,7 @@ public class CardsController {
                     )
             )
     })
+
     @DeleteMapping("/{cardId}")
     public ResponseEntity<ResponseDto> deleteCard(@PathVariable Long cardId) {
         boolean deleted = cardsService.deleteCard(cardId);

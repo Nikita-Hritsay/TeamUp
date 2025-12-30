@@ -1,4 +1,4 @@
-package teams.teams.cards.service.impl;
+package teams.teams.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -7,14 +7,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import teams.teams.cards.dto.CardRequestDto;
-import teams.teams.cards.dto.CardResponseDto;
-import teams.teams.cards.dto.UserDto;
-import teams.teams.cards.mapper.CardMapper;
-import teams.teams.cards.repository.CardsRepository;
-import teams.teams.cards.service.ICardsService;
-import teams.teams.cards.service.client.UsersFeignClient;
-import teams.teams.cards.specification.CardSpecification;
+import teams.teams.dto.CardRequestDto;
+import teams.teams.dto.CardResponseDto;
+import teams.teams.dto.UserDto;
+import teams.teams.mapper.CardMapper;
+import teams.teams.repository.CardsRepository;
+import teams.teams.service.ICardsService;
+import teams.teams.service.client.UsersFeignClient;
+import teams.teams.specification.CardSpecification;
 import teams.teams.entity.Card;
 import teams.teams.entity.Team;
 import teams.teams.exception.ResourceNotFoundException;
