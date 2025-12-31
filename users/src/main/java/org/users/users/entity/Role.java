@@ -13,11 +13,6 @@ import lombok.*;
 public class Role extends BaseEntity
 {
 
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Column(name = "role_name", unique = true)
     private String roleName;
 

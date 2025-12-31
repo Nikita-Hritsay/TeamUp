@@ -3,9 +3,7 @@ package org.users.users.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity(name = "users")
@@ -15,11 +13,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
 
     @Column(name = "first_name")
     private String firstName;

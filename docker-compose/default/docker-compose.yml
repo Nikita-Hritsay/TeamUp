@@ -113,6 +113,22 @@ services:
       SPRING_APPLICATION_NAME: "users"
       SPRING_DATASOURCE_URL: "jdbc:mysql://usersdb:3306/userdb"
 
+  gateway-server:
+    image: "mykyta2/gateway-server:s1"
+    container_name: gateway-ms
+    ports:
+      - "8072:8072"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+    depends_on:
+      users:
+        condition: service_healthy
+      teams:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "gateway"
+
 networks:
   mykyta2:
     driver: "bridge"
