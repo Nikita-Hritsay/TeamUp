@@ -84,6 +84,12 @@ services:
     container_name: teams-ms
     ports:
       - "8081:8081"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     extends:
       file: common-config.yml
       service: microservice-eureka-config
@@ -101,6 +107,12 @@ services:
     container_name: users-ms
     ports:
       - "8083:8083"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8083/actuator/health/readiness" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     extends:
       file: common-config.yml
       service: microservice-eureka-config
@@ -127,7 +139,7 @@ services:
       teams:
         condition: service_healthy
     environment:
-      SPRING_APPLICATION_NAME: "gateway"
+      SPRING_APPLICATION_NAME: "gatewayserver"
 
 networks:
   mykyta2:
