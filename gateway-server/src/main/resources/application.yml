@@ -2,13 +2,23 @@ spring:
   application:
     name: "gatewayserver"
   config:
-    import: "optional:configserver:http://config-server:8071/"
+    import: "optional:configserver:http://localhost:8071/"
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
-          lower-case-service-id: true
+
+
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://localhost:8070/eureka/
 
 management:
   endpoints:
@@ -25,6 +35,6 @@ management:
 ## build with:  mvn compile jib:build
 info:
   app:
-    name: "gateway"
+    name: "gatewayserver"
     description: "Gateway App"
     version: "1.0.0"
