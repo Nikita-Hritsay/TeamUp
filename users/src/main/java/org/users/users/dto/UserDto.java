@@ -57,11 +57,6 @@ public class UserDto
     private Set<RoleDto> roles;
 
     @Schema(
-            description = "Users teams"
-    )
-    private TeamMemberResponseDto teamMember;
-
-    @Schema(
             description = "Users cards"
     )
     private List<CardResponseDto> cards;

@@ -9,8 +9,6 @@ spring:
         locator:
           enabled: true
 
-
-
 eureka:
   instance:
     preferIpAddress: true
@@ -31,6 +29,23 @@ management:
   info:
     env:
       enabled: true
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        permitted-number-of-calls-in-half-open-state: 2
+        failure-rate-threshold: 50
+        wait-duration-in-open-state:
+          nanos: 10000
+      teamsCircuitBreaker:
+        sliding-window-size: 10
+        permitted-number-of-calls-in-half-open-state: 2
+        failure-rate-threshold: 50
+        wait-duration-in-open-state:
+          nanos: 10000
+
 
 ## build with:  mvn compile jib:build
 info:
