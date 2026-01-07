@@ -60,9 +60,4 @@ public class UserDto {
     )
     private TeamMemberResponseDto teamMember;
 
-    @Schema(
-            description = "Users cards"
-    )
-    private List<CardResponseDto> cards;
-
 }

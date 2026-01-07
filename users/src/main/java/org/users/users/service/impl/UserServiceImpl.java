@@ -3,7 +3,6 @@ package org.users.users.service.impl;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.users.users.dto.CardResponseDto;
 import org.users.users.dto.UserDto;
 import org.users.users.entity.Role;
 import org.users.users.entity.User;
@@ -13,9 +12,7 @@ import org.users.users.mapper.UserMapper;
 import org.users.users.repository.RoleRepository;
 import org.users.users.repository.UserRepository;
 import org.users.users.service.IUserService;
-import org.users.users.service.client.CardsFeignClient;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -27,8 +24,6 @@ public class UserServiceImpl implements IUserService {
     private RoleRepository roleRepository;
 
     private UserRepository userRepository;
-
-    private CardsFeignClient cardsFeignClient;
 
     @Override
     public User createUser(UserDto userDto) {
@@ -56,9 +51,7 @@ public class UserServiceImpl implements IUserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id",
                         id.toString()));
 
-        List<CardResponseDto> userCards = cardsFeignClient.getCardsByUserId(user.getId()).getBody();
-
-        return UserMapper.mapToUserDto(user, new UserDto(), userCards);
+        return UserMapper.mapToUserDto(user, new UserDto());
     }
 
     @Override
