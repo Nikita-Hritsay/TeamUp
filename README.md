@@ -1,89 +1,151 @@
 # Microservices System with Spring Boot
 
-This project implements a microservices-based architecture using Spring Boot, demonstrating modern cloud-native application development practices. The system consists of multiple independent services that work together to provide a comprehensive application platform.
+---
 
-## System Architecture
+## High-Level Architecture
 
-The system is built using the following technologies and patterns:
-- Spring Boot for microservice implementation
-- Spring Cloud Config for centralized configuration management
-- Netflix Eureka for service discovery
-- Docker for containerization and deployment
-- Docker Compose for orchestrating the entire system
+The system consists of:
 
-## Services Overview
+• **Business microservices** (Users, Teams)
+• **Infrastructure services** (Config Server, Eureka, Gateway)
+• **Observability stack** (Loki, Grafana, Alloy, MinIO)
+• **Databases** (MySQL for Users and Teams)
 
-### Core Services
+Core architectural patterns:
 
-1. **Users Service**
-   - Manages user accounts and authentication
-   - Handles user profile data and permissions
+• Spring Cloud Config – centralized configuration
+• Eureka – service discovery
+• API Gateway – single entry point
+• Docker & Docker Compose – orchestration
+• Loki + Grafana – logs & observability
 
-2. **Teams Service**
-   - Manages team creation and membership
-   - Handles team-related operations and configurations
+---
 
-3. **Cards Service**
-   - Manages card-related functionality
-   - Handles card operations and data persistence
+## Services Overview (Short)
 
-### Infrastructure Services
+### Application Layer
 
-1. **Spring Cloud Config Server** (Port: 8071)
-   - Centralized configuration management
-   - Provides configuration for all microservices
-   - Supports profile-based configuration management
+• **Users Service** – user domain logic, MySQL-backed
+• **Teams Service** – team domain logic, MySQL-backed
+• **Gateway Server** – routes external traffic to services
 
-2. **Eureka Server** (Port: 8070)
-   - Service discovery and registration
-   - Health monitoring of registered services
-   - Load balancing support
+### Infrastructure
 
-## Deployment
+• **Config Server** – provides configuration to all services
+• **Eureka Server** – service registry and discovery
 
-The entire system is containerized and can be launched using Docker Compose:
+### Observability
+
+• **Loki** – log aggregation (read/write/backend split)
+• **Grafana** – log visualization and dashboards
+• **Alloy** – log collection from Docker containers
+• **MinIO** – object storage for Loki
+
+No Cards service exists in this system.
+
+---
+
+## Build & Image Creation
+
+All Spring Boot services are built locally and packaged into Docker images using **Jib**.
+
+### Standard Build Flow
+
+For each microservice:
 
 ```bash
-docker-compose up
+mvn clean compile jib:build
 ```
 
-### What Docker Compose Does
+Notes:
+• `compile` is sufficient (no fat JAR needed)
+• Jib builds images directly without Dockerfiles
+• Image names must match those used in `docker-compose.yml`
 
-The `docker-compose.yml` configuration:
-- Creates containers for each microservice
-- Sets up necessary networking between services
-- Manages service dependencies and startup order
-- Connects services to their respective databases
-- Configures environment-specific settings
-- Launches infrastructure services (Config Server, Eureka)
+---
 
-### Service Dependencies
+## Database Setup (Manual Option)
 
-1. All services depend on the Spring Cloud Config Server for configuration
-2. Services register themselves with Eureka Server for service discovery
-3. Database containers are launched before their respective services
+If you want to start MySQL containers manually instead of Docker Compose:
 
-## Getting Started
+### Users Database
 
-1. Ensure Docker and Docker Compose are installed
-2. Clone the repository
-3. Run `docker-compose up` in the root directory
-4. Services will be available at their respective ports
-5. Monitor service health through Eureka dashboard at http://localhost:8070
+```bash
+docker run -d \
+  -p 3306:3306 \
+  --name usersdb \
+  -e MYSQL_ROOT_PASSWORD=root \
+  -e MYSQL_DATABASE=userdb \
+  mysql
+```
 
-## Configuration
+### Teams Database
 
-- Each service has its own configuration in the Config Server
-- Environment-specific configurations are managed through profiles
-- Local development can use application.yml files
-- Docker environment uses application-docker.yml configurations
+```bash
+docker run -d \
+  -p 3308:3306 \
+  --name teamsdb \
+  -e MYSQL_ROOT_PASSWORD=root \
+  -e MYSQL_DATABASE=teamsdb \
+  mysql
+```
 
-## Service URLs
+### Keycloak
+```bash
+ docker run -d -p 127.0.0.1:7080:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:26.5.0 start-dev
+```
 
-- Config Server: http://localhost:8071
-- Eureka Server: http://localhost:8070
-- Users Service: http://localhost:8080
-- Teams Service: http://localhost:8081
-- Cards Service: http://localhost:8082
 
-For detailed information about each service, please refer to their individual README files in their respective directories. 
+Docker Compose already includes these databases, so manual creation is optional.
+
+---
+
+## Running the System
+
+To start everything:
+
+```bash
+docker compose up -d
+```
+
+Docker Compose will:
+
+• Start databases
+• Start Config Server
+• Start Eureka Server
+• Start application services
+• Start observability stack
+• Wire all services into a shared network
+
+---
+
+## Access Points
+
+• **Gateway (API entry)**: [http://localhost:8072](http://localhost:8072)
+• **Config Server**: [http://localhost:8071](http://localhost:8071)
+• **Eureka Dashboard**: [http://localhost:8070](http://localhost:8070)
+• **Grafana**: [http://localhost:3000](http://localhost:3000)
+• **Loki (via Gateway)**: [http://localhost:3100](http://localhost:3100)
+
+Grafana is preconfigured with Loki as a datasource.
+
+---
+
+## Observability (Short)
+
+• Logs from all containers are collected by Alloy
+• Logs are stored in Loki (MinIO-backed)
+• Grafana is used for log exploration and dashboards
+
+No metrics or tracing are described here intentionally.
+
+---
+
+## Notes
+
+• All services rely on Config Server at startup
+• Eureka must be healthy before services register
+• Healthchecks control startup order
+• Networking is isolated via a single Docker bridge network
+
+This README describes **how the system is built and run**, not internal business logic.
