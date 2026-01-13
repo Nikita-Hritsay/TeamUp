@@ -17,10 +17,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import teams.teams.api.CardsApi;
+import teams.teams.api.model.CardRequestDto;
+import teams.teams.api.model.CardResponseDto;
+import teams.teams.api.model.ResponseDto;
 import teams.teams.constants.CardConstants;
-import teams.teams.dto.CardRequestDto;
-import teams.teams.dto.CardResponseDto;
-import teams.teams.dto.ResponseDto;
 import teams.teams.service.ICardsService;
 
 import java.util.List;
@@ -32,7 +33,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/api/v1/cards", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Validated
-public class CardsController {
+public class CardsController implements CardsApi {
 
     private final ICardsService cardsService;
 
@@ -49,7 +50,7 @@ public class CardsController {
             description = "Get the current build version of the service"
     )
     @GetMapping("/build-version")
-    public ResponseEntity<String> getBuildVersion() {
+    public ResponseEntity<String> getCardsBuildVersion() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(buildVersion);
@@ -66,9 +67,12 @@ public class CardsController {
     @PostMapping
     public ResponseEntity<ResponseDto> createCard(@Valid @RequestBody CardRequestDto cardRequestDto) {
         cardsService.createCard(cardRequestDto);
+        ResponseDto responseDto = new ResponseDto();
+        responseDto.setStatusCode(CardConstants.STATUS_201);
+        responseDto.setStatusMessage(CardConstants.MESSAGE_201);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new ResponseDto(CardConstants.STATUS_201, CardConstants.MESSAGE_201));
+                .body(responseDto);
     }
 
     @Operation(
@@ -187,12 +191,15 @@ public class CardsController {
     @DeleteMapping("/{cardId}")
     public ResponseEntity<ResponseDto> deleteCard(@PathVariable Long cardId) {
         boolean deleted = cardsService.deleteCard(cardId);
+        ResponseDto responseDto = new ResponseDto();
         if (deleted) {
-            return ResponseEntity.ok(
-                    new ResponseDto(CardConstants.STATUS_200, CardConstants.MESSAGE_200));
+            responseDto.setStatusCode(CardConstants.STATUS_200);
+            responseDto.setStatusMessage(CardConstants.MESSAGE_200);
+            return ResponseEntity.ok(responseDto);
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    new ResponseDto(CardConstants.STATUS_500, CardConstants.MESSAGE_500));
+            responseDto.setStatusCode(CardConstants.STATUS_500);
+            responseDto.setStatusMessage(CardConstants.MESSAGE_500);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
         }
     }
 }

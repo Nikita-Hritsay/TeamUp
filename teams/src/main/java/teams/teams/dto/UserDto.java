@@ -54,10 +54,4 @@ public class UserDto {
             description = "Roles of the user"
     )
     private Set<RoleDto> roles;
-
-    @Schema(
-            description = "Users teams"
-    )
-    private TeamMemberResponseDto teamMember;
-
 }

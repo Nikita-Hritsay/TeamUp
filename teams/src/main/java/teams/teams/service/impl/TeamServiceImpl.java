@@ -4,7 +4,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teams.teams.constants.TeamConstants;
-import teams.teams.dto.*;
+import teams.teams.api.model.*;
+import teams.teams.dto.UserDto;
 import teams.teams.entity.Card;
 import teams.teams.entity.Team;
 import teams.teams.entity.TeamMember;
@@ -124,7 +125,7 @@ public class TeamServiceImpl implements ITeamService {
     }
 
     @Override
-    public TeamResponseDTO fetchTeam(Long teamId) {
+    public TeamResponseDto fetchTeam(Long teamId) {
         return TeamMapper.mapToTeamResponseDto(teamRepository.findById(teamId).orElseThrow(() -> new ResourceNotFoundException("Team", "team Id",
                 teamId.toString())));
     }

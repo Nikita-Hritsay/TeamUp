@@ -1,10 +1,12 @@
 package teams.teams.mapper;
 
-import teams.teams.dto.CardRequestDto;
-import teams.teams.dto.CardResponseDto;
+import teams.teams.api.model.CardRequestDto;
+import teams.teams.api.model.CardResponseDto;
 import teams.teams.entity.Card;
 import teams.teams.entity.Team;
 
+import java.net.URI;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,12 +27,12 @@ public class CardMapper {
         responseDto.setId(card.getId());
         responseDto.setTitle(card.getTitle());
         responseDto.setDescription(card.getDescription());
-        responseDto.setPosterUrl(card.getPosterUrl());
+        responseDto.setPosterUrl(URI.create(card.getPosterUrl()));
         responseDto.setOwnerId(card.getOwnerId());
         responseDto.setTeamId(card.getTeam().getId());
-        responseDto.setCreatedAt(card.getCreatedAt());
+        responseDto.setCreatedAt(OffsetDateTime.from(card.getCreatedAt()));
         responseDto.setCreatedBy(card.getCreatedBy());
-        responseDto.setUpdatedAt(card.getUpdatedAt());
+        responseDto.setUpdatedAt(OffsetDateTime.from(card.getUpdatedAt()));
         responseDto.setUpdatedBy(card.getUpdatedBy());
         return responseDto;
     }
@@ -45,7 +47,7 @@ public class CardMapper {
     public static Card mapToCard(CardRequestDto requestDto, Card card, Team team) {
         card.setTitle(requestDto.getTitle());
         card.setDescription(requestDto.getDescription());
-        card.setPosterUrl(requestDto.getPosterUrl());
+        card.setPosterUrl(requestDto.getPosterUrl().toString());
         card.setOwnerId(requestDto.getOwnerId());
         card.setTeam(team);
         return card;

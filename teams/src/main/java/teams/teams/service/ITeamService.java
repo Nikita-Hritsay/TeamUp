@@ -1,6 +1,6 @@
 package teams.teams.service;
 
-import teams.teams.dto.*;
+import teams.teams.api.model.*;
 import teams.teams.entity.Team;
 
 import java.util.List;
@@ -65,5 +65,5 @@ public interface ITeamService {
      */
     List<TeamMemberResponseDto> getTeamsByMember(Long userId);
 
-    TeamResponseDTO fetchTeam(Long teamId);
+    TeamResponseDto fetchTeam(Long teamId);
 }

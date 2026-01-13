@@ -1,10 +1,12 @@
 package teams.teams.mapper;
 
-import teams.teams.dto.TeamMemberRequestDto;
-import teams.teams.dto.TeamMemberResponseDto;
-import teams.teams.dto.TeamResponseDTO;
+import teams.teams.api.model.TeamMemberRequestDto;
+import teams.teams.api.model.TeamMemberResponseDto;
+import teams.teams.api.model.TeamResponseDto;
 import teams.teams.entity.Team;
 import teams.teams.entity.TeamMember;
+
+import java.time.OffsetDateTime;
 
 public class TeamMapper {
 
@@ -22,10 +24,10 @@ public class TeamMapper {
         responseDto.setUserId(teamMember.getUserId());
         responseDto.setRole(teamMember.getRole());
         responseDto.setStatus(teamMember.getStatus());
-        responseDto.setJoinedAt(teamMember.getJoinedAt());
-        responseDto.setCreatedAt(teamMember.getCreatedAt());
+        responseDto.setJoinedAt(OffsetDateTime.from(teamMember.getJoinedAt()));
+        responseDto.setCreatedAt(OffsetDateTime.from(teamMember.getCreatedAt()));
         responseDto.setCreatedBy(teamMember.getCreatedBy());
-        responseDto.setUpdatedAt(teamMember.getUpdatedAt());
+        responseDto.setUpdatedAt(OffsetDateTime.from(teamMember.getUpdatedAt()));
         responseDto.setUpdatedBy(teamMember.getUpdatedBy());
         return responseDto;
     }
@@ -41,16 +43,16 @@ public class TeamMapper {
         teamMember.setCardId(requestDto.getCardId());
         teamMember.setTeamId(requestDto.getTeamId());
         teamMember.setUserId(requestDto.getUserId());
-        teamMember.setRole(requestDto.getRole());
+        teamMember.setRole(requestDto.getRole().getValue());
         return teamMember;
     }
 
-    public static TeamResponseDTO  mapToTeamResponseDto(Team team) {
-        TeamResponseDTO responseDto = new TeamResponseDTO();
+    public static TeamResponseDto mapToTeamResponseDto(Team team) {
+        TeamResponseDto responseDto = new TeamResponseDto();
         responseDto.setId(team.getId());
         responseDto.setName(team.getName());
         responseDto.setDescription(team.getDescription());
-        responseDto.setTeamMembers(team.getTeamMembers());
+        responseDto.setTeamMembers(team.getTeamMembers().stream().map(TeamMapper::mapToTeamMemberResponseDto).toList());
         return responseDto;
     }
 

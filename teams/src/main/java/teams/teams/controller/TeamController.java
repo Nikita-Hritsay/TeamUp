@@ -14,8 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import teams.teams.api.TeamsApi;
+import teams.teams.api.model.*;
 import teams.teams.constants.TeamConstants;
-import teams.teams.dto.*;
 import teams.teams.service.ITeamService;
 
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/api/v1/teams", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Validated
-public class TeamController {
+public class TeamController implements TeamsApi {
 
     private final ITeamService teamService;
 
@@ -44,7 +45,7 @@ public class TeamController {
             description = "Get the current build version of the service"
     )
     @GetMapping("/build-version")
-    public ResponseEntity<String> getBuildVersion() {
+    public ResponseEntity<String> getTeamsBuildVersion() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(buildVersion);
@@ -59,12 +60,15 @@ public class TeamController {
             description = "HTTP Status CREATED"
     )
     @PostMapping("/create")
-    public ResponseEntity<TeamsResponseDto> createTeam(
+    public ResponseEntity<ResponseDto> createTeam(
             @Valid @RequestBody TeamRequestDto teamRequestDto) {
         teamService.createTeam(teamRequestDto);
+        ResponseDto responseDto = new ResponseDto();
+        responseDto.setStatusCode(TeamConstants.STATUS_201);
+        responseDto.setStatusMessage(TeamConstants.MESSAGE_201);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new TeamsResponseDto(TeamConstants.STATUS_201, TeamConstants.MESSAGE_201));
+                .body(responseDto);
     }
 
     @Operation(
@@ -76,12 +80,15 @@ public class TeamController {
             description = "HTTP Status CREATED"
     )
     @PostMapping("/join")
-    public ResponseEntity<TeamsResponseDto> joinTeam(
+    public ResponseEntity<ResponseDto> joinTeam(
             @Valid @RequestBody TeamMemberRequestDto teamMemberRequestDto) {
         teamService.joinTeam(teamMemberRequestDto);
+        ResponseDto responseDto = new ResponseDto();
+        responseDto.setStatusCode(TeamConstants.STATUS_201);
+        responseDto.setStatusMessage(TeamConstants.MESSAGE_201);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new TeamsResponseDto(TeamConstants.STATUS_201, TeamConstants.MESSAGE_201));
+                .body(responseDto);
     }
 
     @Operation(
@@ -93,13 +100,16 @@ public class TeamController {
             description = "HTTP Status CREATED"
     )
     @PostMapping("/{cardId}/invite")
-    public ResponseEntity<TeamsResponseDto> inviteToTeam(
+    public ResponseEntity<ResponseDto> inviteToTeam(
             @PathVariable Long cardId,
             @Valid @RequestBody TeamMemberRequestDto teamMemberRequestDto) {
         teamService.inviteToTeam(cardId, teamMemberRequestDto);
+        ResponseDto responseDto = new ResponseDto();
+        responseDto.setStatusCode(TeamConstants.STATUS_201);
+        responseDto.setStatusMessage(TeamConstants.MESSAGE_201);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new TeamsResponseDto(TeamConstants.STATUS_201, TeamConstants.MESSAGE_201));
+                .body(responseDto);
     }
 
     @Operation(
@@ -115,7 +125,7 @@ public class TeamController {
                     responseCode = "404",
                     description = "Team member not found",
                     content = @Content(
-                            schema = @Schema(implementation = TeamsResponseDto.class)
+                            schema = @Schema(implementation = ResponseDto.class)
                     )
             )
     })
@@ -141,21 +151,24 @@ public class TeamController {
                     responseCode = "404",
                     description = "Team member not found",
                     content = @Content(
-                            schema = @Schema(implementation = TeamsResponseDto.class)
+                            schema = @Schema(implementation = ResponseDto.class)
                     )
             )
     })
     @DeleteMapping("/{cardId}/remove")
-    public ResponseEntity<TeamsResponseDto> removeMember(
+    public ResponseEntity<ResponseDto> removeMember(
             @PathVariable Long cardId,
             @RequestParam Long userId) {
         boolean removed = teamService.removeMember(cardId, userId);
+        ResponseDto responseDto = new ResponseDto();
         if (removed) {
-            return ResponseEntity.ok(
-                    new TeamsResponseDto(TeamConstants.STATUS_200, TeamConstants.MESSAGE_200));
+            responseDto.setStatusCode(TeamConstants.STATUS_200);
+            responseDto.setStatusMessage(TeamConstants.MESSAGE_200);
+            return ResponseEntity.ok(responseDto);
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    new TeamsResponseDto(TeamConstants.STATUS_500, TeamConstants.MESSAGE_500));
+            responseDto.setStatusCode(TeamConstants.STATUS_500);
+            responseDto.setStatusMessage(TeamConstants.MESSAGE_500);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
         }
     }
 
@@ -182,8 +195,8 @@ public class TeamController {
             description = "HTTP Status OK"
     )
     @GetMapping("/fetch")
-    public ResponseEntity<TeamResponseDTO> fetch(@RequestParam Long teamId) {
-        TeamResponseDTO teamResponseDto = teamService.fetchTeam(teamId);
+    public ResponseEntity<TeamResponseDto> fetch(@RequestParam Long teamId) {
+        TeamResponseDto teamResponseDto = teamService.fetchTeam(teamId);
         return ResponseEntity.ok(teamResponseDto);
     }
 }
