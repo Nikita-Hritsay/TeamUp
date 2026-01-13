@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import { useNavigate } from '../routerShim'
 import { createCard, fetchCards } from '../api/cardsApi'
 import type { CardRequestDto, CardResponseDto, PageResponse } from '../types'
 
@@ -9,9 +10,10 @@ type CardFilters = {
 }
 
 export function CardsPage() {
+  const navigate = useNavigate()
   const [filters, setFilters] = useState<CardFilters>({})
   const [page, setPage] = useState(0)
-  const [size, setSize] = useState(5)
+  const [size, setSize] = useState(10)
   const [cardsPage, setCardsPage] = useState<PageResponse<CardResponseDto> | null>(
     null,
   )
@@ -139,12 +141,23 @@ export function CardsPage() {
           <>
             <ul className="list">
               {cardsPage.content.map((card) => (
-                <li key={card.id} className="list-item">
+                <li
+                  key={card.id}
+                  className="list-item"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/cards/${card.id}`)}
+                >
                   <div className="list-title">
                     <strong>{card.title}</strong>
                     <span className="muted">Card #{card.id}</span>
                   </div>
-                  {card.description && <p className="muted">{card.description}</p>}
+                  {card.description && (
+                    <p className="muted">
+                      {card.description.length > 100
+                        ? `${card.description.substring(0, 100)}...`
+                        : card.description}
+                    </p>
+                  )}
                   <p className="muted">
                     Owner: {card.ownerId} • Team: {card.teamId}
                   </p>

@@ -1,13 +1,6 @@
-import type { ResponseDto, TeamMemberDto, TeamRequestDto } from '../types'
+import type { PageResponse, ResponseDto, TeamMemberDto, TeamRequestDto, TeamResponseDto } from '../types'
 
-const BASE_URL = 'http://localhost:8080/api/v1/teams'
-
-type TeamResponse = {
-  id: number
-  name: string
-  description?: string
-  teamMembers?: TeamMemberDto[]
-}
+const BASE_URL = 'http://localhost:8081/api/v1/teams'
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -48,12 +41,16 @@ export async function joinTeam(payload: TeamMemberDto) {
   return handleResponse<ResponseDto>(response)
 }
 
-export async function getTeamMembers(cardId: number) {
-  const response = await fetch(`${BASE_URL}/${cardId}`)
-  return handleResponse<TeamMemberDto[]>(response)
+export async function getTeamMembers(cardId: number, params?: { page?: number; size?: number }) {
+  const url = new URL(`${BASE_URL}/${cardId}`)
+  if (params?.page !== undefined) url.searchParams.set('page', String(params.page))
+  if (params?.size !== undefined) url.searchParams.set('size', String(params.size))
+  
+  const response = await fetch(url.toString())
+  return handleResponse<PageResponse<TeamMemberDto>>(response)
 }
 
 export async function fetchTeam(teamId: number) {
   const response = await fetch(`${BASE_URL}/fetch?teamId=${encodeURIComponent(teamId)}`)
-  return handleResponse<TeamResponse>(response)
+  return handleResponse<TeamResponseDto>(response)
 }

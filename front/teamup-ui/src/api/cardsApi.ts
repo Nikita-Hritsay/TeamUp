@@ -1,6 +1,6 @@
 import type { CardRequestDto, CardResponseDto, PageResponse, ResponseDto } from '../types'
 
-const BASE_URL = 'http://localhost:8072/teams/api/v1/cards'
+const BASE_URL = 'http://localhost:8081/api/v1/cards'
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {

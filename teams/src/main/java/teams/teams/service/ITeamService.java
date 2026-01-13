@@ -1,5 +1,7 @@
 package teams.teams.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import teams.teams.api.model.*;
 import teams.teams.entity.Team;
 
@@ -50,12 +52,13 @@ public interface ITeamService {
     boolean removeMember(Long cardId, Long userId);
 
     /**
-     * Gets all team members for a specific project
+     * Gets all team members for a specific project with pagination
      * 
      * @param cardId the ID of the card/project
-     * @return list of team members
+     * @param pageable pagination information
+     * @return a page of team members
      */
-    List<TeamMemberResponseDto> getTeamMembers(Long cardId);
+    Page<TeamMemberResponseDto> getTeamMembers(Long cardId, Pageable pageable);
 
     /**
      * Gets all team members for a specific project

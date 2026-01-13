@@ -51,6 +51,13 @@ export type RoleDto = {
   roleName: string
 }
 
+export type TeamResponseDto = {
+  id: number
+  name: string
+  description?: string
+  teamMembers?: TeamMemberDto[]
+}
+
 export type UserDto = {
   Id?: number
   firstName: string

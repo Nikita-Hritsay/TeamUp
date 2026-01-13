@@ -1,6 +1,9 @@
 package teams.teams.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teams.teams.constants.TeamConstants;
@@ -18,6 +21,8 @@ import teams.teams.service.ITeamService;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import jakarta.persistence.criteria.Predicate;
 
 @Service
 @AllArgsConstructor
@@ -112,11 +117,14 @@ public class TeamServiceImpl implements ITeamService {
     }
 
     @Override
-    public List<TeamMemberResponseDto> getTeamMembers(Long cardId) {
-        List<TeamMember> teamMembers = teamMemberRepository.findByCardId(cardId);
-        return teamMembers.stream()
-                .map(TeamMapper::mapToTeamMemberResponseDto)
-                .collect(Collectors.toList());
+    public Page<TeamMemberResponseDto> getTeamMembers(Long cardId, Pageable pageable) {
+        Specification<TeamMember> spec = (root, query, cb) -> {
+            Predicate predicate = cb.equal(root.get("cardId"), cardId);
+            return predicate;
+        };
+        
+        Page<TeamMember> teamMembersPage = teamMemberRepository.findAll(spec, pageable);
+        return teamMembersPage.map(TeamMapper::mapToTeamMemberResponseDto);
     }
 
     @Override

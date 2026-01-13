@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +21,6 @@ import teams.teams.api.TeamsApi;
 import teams.teams.api.model.*;
 import teams.teams.constants.TeamConstants;
 import teams.teams.service.ITeamService;
-
-import java.util.List;
 
 @Tag(
         name = "CRUD REST API for Team Management",
@@ -174,15 +175,19 @@ public class TeamController implements TeamsApi {
 
     @Operation(
             summary = "Get Team Members REST API",
-            description = "Get all members of a specific team/project"
+            description = "Get all members of a specific team/project with pagination"
     )
     @ApiResponse(
             responseCode = "200",
             description = "HTTP Status OK"
     )
     @GetMapping("/{cardId}")
-    public ResponseEntity<List<TeamMemberResponseDto>> getTeamMembers(@PathVariable Long cardId) {
-        List<TeamMemberResponseDto> teamMembers = teamService.getTeamMembers(cardId);
+    public ResponseEntity<Page<TeamMemberResponseDto>> getTeamMembers(
+            @PathVariable Long cardId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<TeamMemberResponseDto> teamMembers = teamService.getTeamMembers(cardId, pageable);
         return ResponseEntity.ok(teamMembers);
     }
 

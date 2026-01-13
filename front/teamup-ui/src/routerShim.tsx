@@ -61,7 +61,18 @@ export function Routes({ children }: RoutesProps) {
   for (const child of routes) {
     if (!child || typeof child !== 'object') continue
     const element = (child as { props?: RouteProps }).props
-    if (element?.path === router.pathname) {
+    if (!element?.path) continue
+    
+    // Exact match
+    if (element.path === router.pathname) {
+      match = element.element
+      break
+    }
+    
+    // Parameterized route match (e.g., /cards/:cardId)
+    const pathPattern = element.path.replace(/:[^/]+/g, '([^/]+)')
+    const regex = new RegExp(`^${pathPattern}$`)
+    if (regex.test(router.pathname)) {
       match = element.element
       break
     }

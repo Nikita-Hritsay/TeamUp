@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { joinTeam, createTeam, getTeamMembers } from '../api/teamsApi'
-import type { TeamMemberDto, TeamRequestDto } from '../types'
+import { createTeam, getTeamMembers } from '../api/teamsApi'
+import type { TeamMemberDto, TeamRequestDto, PageResponse } from '../types'
 
 export function TeamsPage() {
   const [teamForm, setTeamForm] = useState<TeamRequestDto>({
@@ -11,17 +11,12 @@ export function TeamsPage() {
   const [teamMessage, setTeamMessage] = useState('')
   const [teamError, setTeamError] = useState('')
 
-  const [joinForm, setJoinForm] = useState<TeamMemberDto>({
-    userId: 0,
-    role: 'PARTICIPANT',
-    teamId: 0,
-  })
-  const [joinMessage, setJoinMessage] = useState('')
-  const [joinError, setJoinError] = useState('')
-
   const [membersCardId, setMembersCardId] = useState('')
-  const [members, setMembers] = useState<TeamMemberDto[]>([])
+  const [membersPage, setMembersPage] = useState<PageResponse<TeamMemberDto> | null>(null)
   const [membersError, setMembersError] = useState('')
+  const [membersLoading, setMembersLoading] = useState(false)
+  const [membersPageNum, setMembersPageNum] = useState(0)
+  const [membersPageSize, setMembersPageSize] = useState(10)
 
   const handleCreateTeam = async (event: FormEvent) => {
     event.preventDefault()
@@ -40,39 +35,37 @@ export function TeamsPage() {
     }
   }
 
-  const handleJoinTeam = async (event: FormEvent) => {
-    event.preventDefault()
-    setJoinMessage('')
-    setJoinError('')
-    if (!joinForm.userId || !joinForm.teamId || !joinForm.role) {
-      setJoinError('User ID, Team ID, and Role are required.')
-      return
-    }
-    try {
-      await joinTeam(joinForm)
-      setJoinMessage('Join request submitted.')
-    } catch (err) {
-      setJoinError(err instanceof Error ? err.message : 'Unable to join team.')
-    }
-  }
-
-  const handleFetchMembers = async (event: FormEvent) => {
-    event.preventDefault()
+  const handleFetchMembers = async (event?: FormEvent) => {
+    if (event) event.preventDefault()
     const parsedCardId = Number(membersCardId)
     if (!parsedCardId) {
       setMembersError('Please provide a valid Card ID.')
-      setMembers([])
+      setMembersPage(null)
       return
     }
     setMembersError('')
+    setMembersLoading(true)
     try {
-      const data = await getTeamMembers(parsedCardId)
-      setMembers(data)
+      const data = await getTeamMembers(parsedCardId, {
+        page: membersPageNum,
+        size: membersPageSize,
+      })
+      setMembersPage(data)
     } catch (err) {
       setMembersError(err instanceof Error ? err.message : 'Unable to load members.')
-      setMembers([])
+      setMembersPage(null)
+    } finally {
+      setMembersLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (membersCardId) {
+      handleFetchMembers()
+    }
+  }, [membersPageNum, membersPageSize])
+
+  const totalMembersPages = useMemo(() => membersPage?.totalPages ?? 0, [membersPage])
 
   return (
     <section>
@@ -107,66 +100,6 @@ export function TeamsPage() {
       </div>
 
       <div className="panel">
-        <h3>Join Team</h3>
-        <form className="form" onSubmit={handleJoinTeam}>
-          <label className="form-field">
-            <span>User ID</span>
-            <input
-              type="number"
-              min={1}
-              value={joinForm.userId || ''}
-              onChange={(event) =>
-                setJoinForm((prev) => ({ ...prev, userId: Number(event.target.value) }))
-              }
-              required
-            />
-          </label>
-          <label className="form-field">
-            <span>Team ID</span>
-            <input
-              type="number"
-              min={1}
-              value={joinForm.teamId || ''}
-              onChange={(event) =>
-                setJoinForm((prev) => ({ ...prev, teamId: Number(event.target.value) }))
-              }
-              required
-            />
-          </label>
-          <label className="form-field">
-            <span>Card ID</span>
-            <input
-              type="number"
-              min={1}
-              value={joinForm.cardId ?? ''}
-              onChange={(event) =>
-                setJoinForm((prev) => ({
-                  ...prev,
-                  cardId: event.target.value ? Number(event.target.value) : undefined,
-                }))
-              }
-            />
-          </label>
-          <label className="form-field">
-            <span>Role</span>
-            <select
-              value={joinForm.role}
-              onChange={(event) =>
-                setJoinForm((prev) => ({ ...prev, role: event.target.value }))
-              }
-            >
-              <option value="CREATOR">CREATOR</option>
-              <option value="PARTICIPANT">PARTICIPANT</option>
-              <option value="LEADER">LEADER</option>
-            </select>
-          </label>
-          <button type="submit">Join</button>
-        </form>
-        {joinError && <div className="error">{joinError}</div>}
-        {joinMessage && <div className="success">{joinMessage}</div>}
-      </div>
-
-      <div className="panel">
         <h3>Team Members by Card</h3>
         <form className="form inline-form" onSubmit={handleFetchMembers}>
           <label className="form-field">
@@ -175,33 +108,92 @@ export function TeamsPage() {
               type="number"
               min={1}
               value={membersCardId}
-              onChange={(event) => setMembersCardId(event.target.value)}
+              onChange={(event) => {
+                setMembersCardId(event.target.value)
+                setMembersPageNum(0)
+              }}
               required
             />
           </label>
-          <button type="submit">Load Members</button>
+          <label className="form-field small">
+            <span>Page Size</span>
+            <input
+              type="number"
+              min={1}
+              max={50}
+              value={membersPageSize}
+              onChange={(event) => {
+                const nextSize = Number(event.target.value)
+                setMembersPageSize(Number.isNaN(nextSize) ? 10 : nextSize)
+                setMembersPageNum(0)
+              }}
+            />
+          </label>
+          <button type="submit" disabled={membersLoading}>
+            {membersLoading ? 'Loading…' : 'Load Members'}
+          </button>
         </form>
         {membersError && <div className="error">{membersError}</div>}
-        {!membersError && members.length === 0 && (
-          <p className="muted">No members to display.</p>
+        {membersLoading && <p>Loading members…</p>}
+        {!membersLoading && membersPage && (
+          <>
+            {membersPage.content.length === 0 ? (
+              <p className="muted">No members to display.</p>
+            ) : (
+              <>
+                <ul className="list">
+                  {membersPage.content.map((member) => (
+                    <li
+                      key={member.id ?? `${member.userId}-${member.teamId}`}
+                      className="list-item"
+                    >
+                      <div className="list-title">
+                        <strong>User {member.userId}</strong>
+                        <span className="muted">Team {member.teamId}</span>
+                      </div>
+                      <p className="muted">
+                        Role: {member.role} {member.status ? `• Status: ${member.status}` : ''}
+                      </p>
+                      {member.cardId && <p className="muted">Card: {member.cardId}</p>}
+                    </li>
+                  ))}
+                </ul>
+                {totalMembersPages > 0 && (
+                  <div className="pagination">
+                    <button
+                      type="button"
+                      onClick={() => setMembersPageNum((prev) => Math.max(prev - 1, 0))}
+                      disabled={membersPageNum === 0}
+                    >
+                      Previous
+                    </button>
+                    <span>
+                      Page {membersPageNum + 1} of {totalMembersPages}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setMembersPageNum((prev) =>
+                          membersPage.totalPages
+                            ? Math.min(prev + 1, totalMembersPages - 1)
+                            : prev,
+                        )
+                      }
+                      disabled={membersPageNum + 1 >= totalMembersPages}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </>
         )}
-        {members.length > 0 && (
-          <ul className="list">
-            {members.map((member) => (
-              <li key={member.id ?? `${member.userId}-${member.teamId}`} className="list-item">
-                <div className="list-title">
-                  <strong>User {member.userId}</strong>
-                  <span className="muted">Team {member.teamId}</span>
-                </div>
-                <p className="muted">
-                  Role: {member.role} {member.status ? `• Status: ${member.status}` : ''}
-                </p>
-                {member.cardId && <p className="muted">Card: {member.cardId}</p>}
-              </li>
-            ))}
-          </ul>
+        {!membersLoading && !membersPage && !membersCardId && (
+          <p className="muted">Enter a Card ID to load team members.</p>
         )}
       </div>
     </section>
   )
 }
+

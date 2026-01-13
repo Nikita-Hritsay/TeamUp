@@ -1,6 +1,7 @@
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Link, Route, Routes } from './routerShim'
 import './App.css'
 import { CardsPage } from './pages/CardsPage'
+import { CardDetailPage } from './pages/CardDetailPage'
 import { TeamsPage } from './pages/TeamsPage'
 import { UsersPage } from './pages/UsersPage'
 
@@ -20,6 +21,7 @@ function App() {
           <Routes>
             <Route path="/" element={<CardsPage />} />
             <Route path="/cards" element={<CardsPage />} />
+            <Route path="/cards/:cardId" element={<CardDetailPage />} />
             <Route path="/teams" element={<TeamsPage />} />
             <Route path="/users" element={<UsersPage />} />
           </Routes>
