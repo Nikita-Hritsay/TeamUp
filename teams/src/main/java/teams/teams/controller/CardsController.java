@@ -20,9 +20,11 @@ import org.springframework.web.bind.annotation.*;
 import teams.teams.api.CardsApi;
 import teams.teams.api.model.CardRequestDto;
 import teams.teams.api.model.CardResponseDto;
+import teams.teams.api.model.PagingCardResponseDto;
 import teams.teams.api.model.ResponseDto;
 import teams.teams.constants.CardConstants;
 import teams.teams.service.ICardsService;
+import teams.teams.util.PageUtils;
 
 import java.util.List;
 
@@ -112,7 +114,7 @@ public class CardsController implements CardsApi {
             description = "HTTP Status OK"
     )
     @GetMapping
-    public ResponseEntity<Page<CardResponseDto>> getAllCards(
+    public ResponseEntity<PagingCardResponseDto> getAllCards(
             @RequestParam(required = false) Long ownerId,
             @RequestParam(required = false) String title,
             @RequestParam(defaultValue = "0") int page,
@@ -122,12 +124,12 @@ public class CardsController implements CardsApi {
         // If filtering parameters are provided, use filtered search
         if (ownerId != null || (title != null && !title.isEmpty())) {
             Page<CardResponseDto> filteredCards = cardsService.getFilteredCards(ownerId, title, pageable);
-            return ResponseEntity.ok(filteredCards);
+            return ResponseEntity.ok(PageUtils.toPagingCardResponseDto(filteredCards));
         }
 
         // Otherwise, get all cards
         Page<CardResponseDto> cards = cardsService.getAllCards(pageable);
-        return ResponseEntity.ok(cards);
+        return ResponseEntity.ok(PageUtils.toPagingCardResponseDto(cards));
     }
 
     @Operation(
@@ -201,5 +203,20 @@ public class CardsController implements CardsApi {
             responseDto.setStatusMessage(CardConstants.MESSAGE_500);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
         }
+    }
+
+    @Override
+    public ResponseEntity<PagingCardResponseDto> getAllCards(Long ownerId, String title, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 10);
+
+        // If filtering parameters are provided, use filtered search
+        if (ownerId != null || (title != null && !title.isEmpty())) {
+            Page<CardResponseDto> filteredCards = cardsService.getFilteredCards(ownerId, title, pageable);
+            return ResponseEntity.ok(PageUtils.toPagingCardResponseDto(filteredCards));
+        }
+
+        // Otherwise, get all cards
+        Page<CardResponseDto> cards = cardsService.getAllCards(pageable);
+        return ResponseEntity.ok(PageUtils.toPagingCardResponseDto(cards));
     }
 }

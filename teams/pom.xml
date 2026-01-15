@@ -127,9 +127,9 @@
                             <apiPackage>teams.teams.api</apiPackage>
                             <modelPackage>teams.teams.api.model</modelPackage>
                             <configOptions>
-                                <interfaceOnly>false</interfaceOnly>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>true</skipDefaultInterface>
                                 <useSpringBoot3>true</useSpringBoot3>
-                                <skipDefaultInterface>false</skipDefaultInterface>
                                 <useTags>true</useTags>
                                 <generateApiTests>false</generateApiTests>
                                 <generateModelTests>false</generateModelTests>

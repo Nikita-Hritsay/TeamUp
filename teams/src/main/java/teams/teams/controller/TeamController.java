@@ -21,6 +21,7 @@ import teams.teams.api.TeamsApi;
 import teams.teams.api.model.*;
 import teams.teams.constants.TeamConstants;
 import teams.teams.service.ITeamService;
+import teams.teams.util.PageUtils;
 
 @Tag(
         name = "CRUD REST API for Team Management",
@@ -182,13 +183,13 @@ public class TeamController implements TeamsApi {
             description = "HTTP Status OK"
     )
     @GetMapping("/{cardId}")
-    public ResponseEntity<Page<TeamMemberResponseDto>> getTeamMembers(
+    public ResponseEntity<PagingTeamMemberResponseDto> getTeamMembers(
             @PathVariable Long cardId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<TeamMemberResponseDto> teamMembers = teamService.getTeamMembers(cardId, pageable);
-        return ResponseEntity.ok(teamMembers);
+        return ResponseEntity.ok(PageUtils.toPagingTeamMemberResponseDto(teamMembers));
     }
 
     @Operation(
@@ -203,5 +204,12 @@ public class TeamController implements TeamsApi {
     public ResponseEntity<TeamResponseDto> fetch(@RequestParam Long teamId) {
         TeamResponseDto teamResponseDto = teamService.fetchTeam(teamId);
         return ResponseEntity.ok(teamResponseDto);
+    }
+
+    @Override
+    public ResponseEntity<PagingTeamMemberResponseDto> getTeamMembers(Long cardId, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 10);
+        Page<TeamMemberResponseDto> teamMembers = teamService.getTeamMembers(cardId, pageable);
+        return ResponseEntity.ok(PageUtils.toPagingTeamMemberResponseDto(teamMembers));
     }
 }

@@ -93,20 +93,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  content:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/CardResponseDto'
-                  totalElements:
-                    type: integer
-                  totalPages:
-                    type: integer
-                  size:
-                    type: integer
-                  number:
-                    type: integer
+                $ref: '#/components/schemas/PagingCardResponseDto'
 
   /api/v1/cards/fetch:
     get:
@@ -442,20 +429,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  content:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/TeamMemberResponseDto'
-                  totalElements:
-                    type: integer
-                  totalPages:
-                    type: integer
-                  size:
-                    type: integer
-                  number:
-                    type: integer
+                $ref: '#/components/schemas/PagingTeamMemberResponseDto'
 
   /api/v1/teams/fetch:
     get:
@@ -704,5 +678,48 @@ components:
           type: string
           description: User who last updated the team member
           example: "admin"
+
+    PagingDto:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+          description: Total number of elements across all pages
+          example: 100
+        totalPages:
+          type: integer
+          description: Total number of pages
+          example: 10
+        number:
+          type: integer
+          description: Current page number (0-indexed)
+          example: 0
+        size:
+          type: integer
+          description: Number of elements per page
+          example: 10
+
+    PagingCardResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/PagingDto'
+        - type: object
+          properties:
+            content:
+              type: array
+              description: List of cards in the current page
+              items:
+                $ref: '#/components/schemas/CardResponseDto'
+
+    PagingTeamMemberResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/PagingDto'
+        - type: object
+          properties:
+            content:
+              type: array
+              description: List of team members in the current page
+              items:
+                $ref: '#/components/schemas/TeamMemberResponseDto'
 
 
