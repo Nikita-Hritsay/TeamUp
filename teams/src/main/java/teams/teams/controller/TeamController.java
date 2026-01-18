@@ -67,7 +67,7 @@ public class TeamController implements TeamsApi {
         teamService.createTeam(teamRequestDto);
         ResponseDto responseDto = new ResponseDto();
         responseDto.setStatusCode(TeamConstants.STATUS_201);
-        responseDto.setStatusMessage(TeamConstants.MESSAGE_201);
+        responseDto.setStatusMessage(TeamConstants.MESSAGE_201_TEAM_CREATED);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(responseDto);

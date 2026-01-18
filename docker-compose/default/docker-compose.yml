@@ -201,6 +201,8 @@ services:
     container_name: usersdb
     ports:
       - 3306:3306
+    volumes:
+      - usersdb_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 10s
@@ -219,6 +221,8 @@ services:
     container_name: teamsdb
     ports:
       - 3308:3306
+    volumes:
+      - teamsdb_data:/var/lib/mysql
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       timeout: 10s
@@ -279,8 +283,6 @@ services:
   teams:
     image: "mykyta2/teams:s1"
     container_name: teams-ms
-    ports:
-      - "8081:8081"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness" ]
       interval: 10s
@@ -302,8 +304,6 @@ services:
   users:
     image: "mykyta2/users:s1"
     container_name: users-ms
-    ports:
-      - "8083:8083"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8083/actuator/health/readiness" ]
       interval: 10s
@@ -337,7 +337,25 @@ services:
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "gatewayserver"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWT-SET-URI: "http://localhost:8080/realms/TeamUp/protocol/openid-connect/certs"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    ports:
+      - "7080:8080"
+    environment:
+      KEYCLOAK_ADMIN: "admin"
+      KEYCLOAK_ADMIN_PASSWORD: "admin"
+    command: "start-dev"
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
 
 networks:
   mykyta2:
     driver: "bridge"
+
+volumes:
+  usersdb_data:
+  teamsdb_data:
