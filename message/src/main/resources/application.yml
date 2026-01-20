@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: "message"
+
+server:
+  port: 9080
