@@ -1,9 +1,13 @@
 package org.users.users.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.users.users.dto.UserDto;
+import org.users.users.dto.UserMessageDto;
 import org.users.users.entity.Role;
 import org.users.users.entity.User;
 import org.users.users.exception.ResourceNotFoundException;
@@ -22,8 +26,11 @@ import java.util.Set;
 public class UserServiceImpl implements IUserService {
 
     private RoleRepository roleRepository;
-
     private UserRepository userRepository;
+
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
+    private final StreamBridge streamBridge;
 
     @Override
     public User createUser(UserDto userDto) {
@@ -35,7 +42,11 @@ public class UserServiceImpl implements IUserService {
                     "User already exists with given mobile number: " + userDto.getMobileNumber());
         }
         createNewUserWithDefaultRole(user);
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+        var send = streamBridge.send("sendCommunication-out-0",
+                new UserMessageDto(saved.getFirstName(), saved.getLastName(), saved.getEmail(), saved.getMobileNumber()));
+        log.info("User send out: {}", send);
+        return saved;
     }
 
     private void createNewUserWithDefaultRole(User user) {
