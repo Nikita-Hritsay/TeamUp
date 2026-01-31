@@ -7,6 +7,7 @@ import teams.teams.entity.Team;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,9 +31,9 @@ public class CardMapper {
         responseDto.setPosterUrl(URI.create(card.getPosterUrl()));
         responseDto.setOwnerId(card.getOwnerId());
         responseDto.setTeamId(card.getTeam().getId());
-        responseDto.setCreatedAt(OffsetDateTime.from(card.getCreatedAt()));
+        responseDto.setCreatedAt(card.getCreatedAt().atZone(ZoneId.systemDefault()).toOffsetDateTime());
         responseDto.setCreatedBy(card.getCreatedBy());
-        responseDto.setUpdatedAt(OffsetDateTime.from(card.getUpdatedAt()));
+        responseDto.setUpdatedAt(card.getUpdatedAt().atZone(ZoneId.systemDefault()).toOffsetDateTime());
         responseDto.setUpdatedBy(card.getUpdatedBy());
         return responseDto;
     }
@@ -50,6 +51,7 @@ public class CardMapper {
         card.setPosterUrl(requestDto.getPosterUrl().toString());
         card.setOwnerId(requestDto.getOwnerId());
         card.setTeam(team);
+        card.setUpdatedAt(OffsetDateTime.now(ZoneId.systemDefault()).toLocalDateTime());
         return card;
     }
 }
