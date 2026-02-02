@@ -6,10 +6,12 @@ spring:
       definition: email|sms
     stream:
       bindings:
+        emailsms-out-0:
+          destination: communication-sent
+          group: ${spring.application.name}
         emailsms-in-0:
           destination: send-communication
           group: ${spring.application.name}
-          contentType: application/json
   rabbitmq:
     host: localhost
     port: 5672

@@ -41,6 +41,7 @@ public class UserMapper
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setMobileNumber(userDto.getMobileNumber());
+        user.setSentEmails(false);
         if (userDto.getRoles() != null) {
             Set<Role> roles = userDto.getRoles().stream()
                     .map(roleDto -> {

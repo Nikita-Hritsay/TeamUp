@@ -2,6 +2,7 @@ package org.users.users.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.integration.annotation.Default;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -25,6 +26,9 @@ public class User extends BaseEntity {
 
     @Column(name = "mobile_number")
     private String mobileNumber;
+
+    @Column(name = "sentEmails")
+    private boolean sentEmails;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

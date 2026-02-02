@@ -24,11 +24,14 @@ spring:
     password: guest
     connection-timeout: 10s
   cloud:
+    function:
+      definition: emailsSent
     stream:
       bindings:
         sendCommunication-out-0:
           destination: send-communication
-          contentType: application/json
+        emailsSent-int-0:
+          destination: communication-sent
   config:
     import: "optional:configserver:http://localhost:8071/"
 
