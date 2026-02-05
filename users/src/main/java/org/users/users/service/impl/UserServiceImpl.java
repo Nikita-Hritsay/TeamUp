@@ -44,7 +44,7 @@ public class UserServiceImpl implements IUserService {
         createNewUserWithDefaultRole(user);
         User saved = userRepository.save(user);
         var send = streamBridge.send("sendCommunication-out-0",
-                new UserMessageDto(saved.getFirstName(), saved.getLastName(), saved.getEmail(), saved.getMobileNumber()));
+                new UserMessageDto(saved.getId(), saved.getFirstName(), saved.getLastName(), saved.getEmail(), saved.getMobileNumber()));
         log.info("User send out: {}", send);
         return saved;
     }

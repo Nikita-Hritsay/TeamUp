@@ -18,10 +18,10 @@ public class MessageConfiguration {
     }
 
     @Bean
-    public Function<UserMessageDto, String> sms() {
+    public Function<UserMessageDto, Long> sms() {
         return userMessageDTO -> {
             System.out.println("Sending message: " + userMessageDTO.mobileNumber());
-            return userMessageDTO.mobileNumber();
+            return userMessageDTO.id();
         };
     }
 

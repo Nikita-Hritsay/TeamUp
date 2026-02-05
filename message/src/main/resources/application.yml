@@ -6,11 +6,11 @@ spring:
       definition: email|sms
     stream:
       bindings:
-        emailsms-out-0:
-          destination: communication-sent
-          group: ${spring.application.name}
         emailsms-in-0:
           destination: send-communication
+          group: ${spring.application.name}
+        emailsms-out-0:
+          destination: communication-sent
           group: ${spring.application.name}
   rabbitmq:
     host: localhost
