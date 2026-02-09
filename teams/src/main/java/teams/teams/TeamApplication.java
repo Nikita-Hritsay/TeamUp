@@ -5,9 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "teams.teams")
 @EnableJpaAuditing(auditorAwareRef = "auditAwareImpl")
-@EnableFeignClients
+@EnableFeignClients(basePackages = "teams.teams.service.client")
 public class TeamApplication {
 
     public static void main(String[] args) {
