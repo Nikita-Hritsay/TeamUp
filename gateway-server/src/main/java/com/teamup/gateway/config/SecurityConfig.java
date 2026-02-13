@@ -17,8 +17,8 @@ public class SecurityConfig {
         http
             .authorizeExchange(exchange -> {
                 exchange.pathMatchers(HttpMethod.GET).permitAll()
-                        .pathMatchers("/TEAMS/**").authenticated()
-                        .pathMatchers("/USERS/**").authenticated();
+                        .pathMatchers("/TEAMS/**").permitAll()
+                        .pathMatchers("/USERS/**").permitAll();
             }).oauth2ResourceServer(oauth2 -> {
                 oauth2.jwt(Customizer.withDefaults());
             });
