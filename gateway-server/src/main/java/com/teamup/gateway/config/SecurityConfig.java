@@ -16,9 +16,9 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
             .authorizeExchange(exchange -> {
-                exchange.pathMatchers(HttpMethod.GET).permitAll()
-                        .pathMatchers("/TEAMS/**").permitAll()
-                        .pathMatchers("/USERS/**").permitAll();
+                exchange//pathMatchers(HttpMethod.GET).permitAll()
+                        .pathMatchers("/TEAMS/**").authenticated()
+                        .pathMatchers("/USERS/**").authenticated();
             }).oauth2ResourceServer(oauth2 -> {
                 oauth2.jwt(Customizer.withDefaults());
             });

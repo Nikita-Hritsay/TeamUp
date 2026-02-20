@@ -17,12 +17,6 @@ spring:
   sql:
     init:
       mode: always
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
-    connection-timeout: 10s
   cloud:
     function:
       definition: emailsSent
@@ -34,6 +28,10 @@ spring:
         emailsSent-in-0:
           destination: communication-sent
           group: ${spring.application.name}
+      kafka:
+        binder:
+          brokers:
+            - localhost:9092
   config:
     import: "optional:configserver:http://localhost:8071/"
 
