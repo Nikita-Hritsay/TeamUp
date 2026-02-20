@@ -1,5 +1,14 @@
 # Microservices System with Spring Boot
 
+
+How to create users:
+* Open Keycloak
+* Create Realm TeamUp
+* added Client with  Client Authentication On and Service Account On (this will be for Client Creds scope)
+* also create one for Users as Standard Flow - this one is for Users
+* Postman json is in the Config module - resources folder;
+
+Keycloak admin panel - http://localhost:7080/realms/TeamUp/.well-known/openid-configuration
 ---
 
 ## High-Level Architecture
