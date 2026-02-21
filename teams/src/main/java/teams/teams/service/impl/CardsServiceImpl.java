@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import teams.teams.api.model.CardRequestDto;
 import teams.teams.api.model.CardResponseDto;
 import teams.teams.dto.UserDto;
+import teams.teams.entity.TeamMember;
 import teams.teams.mapper.CardMapper;
 import teams.teams.repository.CardsRepository;
 import teams.teams.service.ICardsService;
@@ -39,6 +40,7 @@ public class CardsServiceImpl implements ICardsService {
         }
         Team team = teamRepository.findById(cardRequestDto.getTeamId())
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", cardRequestDto.getTeamId().toString()));
+        // add logic whether user is member of team or not
         Card card = CardMapper.mapToCard(cardRequestDto, new Card(), team);
         Card savedCard = cardsRepository.save(card);
         return CardMapper.mapToCardResponseDto(savedCard);
@@ -54,6 +56,10 @@ public class CardsServiceImpl implements ICardsService {
 
     @Override
     public List<CardResponseDto> getCardsByUserId(Long userId) {
+        ResponseEntity<UserDto> userDtoResponseEntity = usersFeignClient.fetchUser(userId);
+        if (userDtoResponseEntity.getStatusCode().is4xxClientError()) {
+            throw new ResourceNotFoundException("User", "id", userId.toString());
+        }
         List<Card> cards = cardsRepository.findByOwnerId(userId);
         return CardMapper.mapToCardsResponseDto(cards);
     }

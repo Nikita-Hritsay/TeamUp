@@ -72,7 +72,7 @@ export async function buildAuthUrl(): Promise<{ url: string; state: string }> {
     response_type: 'code',
     client_id: authConfig.clientId,
     redirect_uri: authConfig.redirectUri,
-    scope: 'openid',
+    scope: 'openid email',
     state,
     code_challenge: codeChallenge,
     code_challenge_method: 'S256',

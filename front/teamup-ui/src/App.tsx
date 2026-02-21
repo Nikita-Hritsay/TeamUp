@@ -19,10 +19,7 @@ function AppShell() {
       <header className="app-header">
         <h1>TeamUp Dashboard</h1>
         <nav className="nav">
-          <Link to="/cards">Cards</Link>
           <Link to="/teams">My Teams</Link>
-          <Link to="/teams/all">All Teams</Link>
-          <Link to="/users">Users</Link>
           {isAuthenticated ? (
             <>
               {user?.preferred_username && (

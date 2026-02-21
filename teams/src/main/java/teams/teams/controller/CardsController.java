@@ -106,34 +106,6 @@ public class CardsController implements CardsApi {
     }
 
     @Operation(
-            summary = "Get All Cards REST API",
-            description = "Get all cards with pagination and optional filtering by ownerId or title"
-    )
-    @ApiResponse(
-            responseCode = "200",
-            description = "HTTP Status OK"
-    )
-    @GetMapping
-    public ResponseEntity<PagingCardResponseDto> getAllCards(
-            @RequestParam(required = false) Long ownerId,
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) Long teamId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-
-        // If filtering parameters are provided, use filtered search
-        if (ownerId != null || (title != null && !title.isEmpty()) || teamId != null) {
-            Page<CardResponseDto> filteredCards = cardsService.getFilteredCards(ownerId, title, teamId, pageable);
-            return ResponseEntity.ok(PageUtils.toPagingCardResponseDto(filteredCards));
-        }
-
-        // Otherwise, get all cards
-        Page<CardResponseDto> cards = cardsService.getAllCards(pageable);
-        return ResponseEntity.ok(PageUtils.toPagingCardResponseDto(cards));
-    }
-
-    @Operation(
             summary = "Update Card REST API",
             description = "Update an existing card"
     )
