@@ -6,6 +6,7 @@ import teams.teams.api.model.TeamResponseDto;
 import teams.teams.entity.Team;
 import teams.teams.entity.TeamMember;
 
+import java.util.Collections;
 import java.time.OffsetDateTime;
 
 public class TeamMapper {
@@ -53,6 +54,18 @@ public class TeamMapper {
         responseDto.setName(team.getName());
         responseDto.setDescription(team.getDescription());
         responseDto.setTeamMembers(team.getTeamMembers().stream().map(TeamMapper::mapToTeamMemberResponseDto).toList());
+        return responseDto;
+    }
+
+    /**
+     * Maps Team to TeamResponseDto without loading team members (for list views).
+     */
+    public static TeamResponseDto mapToTeamResponseDtoSummary(Team team) {
+        TeamResponseDto responseDto = new TeamResponseDto();
+        responseDto.setId(team.getId());
+        responseDto.setName(team.getName());
+        responseDto.setDescription(team.getDescription());
+        responseDto.setTeamMembers(Collections.emptyList());
         return responseDto;
     }
 

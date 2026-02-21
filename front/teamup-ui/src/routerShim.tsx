@@ -84,9 +84,10 @@ export function Routes({ children }: RoutesProps) {
 type LinkProps = {
   to: string
   children: ReactNode
+  className?: string
 }
 
-export function Link({ to, children }: LinkProps) {
+export function Link({ to, children, className }: LinkProps) {
   const router = useRouterContext()
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -95,7 +96,7 @@ export function Link({ to, children }: LinkProps) {
   }
 
   return (
-    <a href={to} onClick={handleClick}>
+    <a href={to} onClick={handleClick} className={className}>
       {children}
     </a>
   )

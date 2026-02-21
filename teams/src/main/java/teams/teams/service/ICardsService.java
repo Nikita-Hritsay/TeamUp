@@ -59,12 +59,13 @@ public interface ICardsService {
     Page<CardResponseDto> getAllCards(Pageable pageable);
 
     /**
-     * Retrieves cards filtered by ownerId and/or title with pagination
+     * Retrieves cards filtered by ownerId, title and/or teamId with pagination
      *
      * @param ownerId the owner ID to filter by (optional)
      * @param title the title to filter by (optional)
+     * @param teamId the team ID to filter by (optional)
      * @param pageable pagination information
      * @return a page of filtered cards
      */
-    Page<CardResponseDto> getFilteredCards(Long ownerId, String title, Pageable pageable);
+    Page<CardResponseDto> getFilteredCards(Long ownerId, String title, Long teamId, Pageable pageable);
 }

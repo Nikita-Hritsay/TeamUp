@@ -24,6 +24,21 @@ public class CardSpecification {
     }
 
     /**
+     * Creates a specification to filter cards by team ID
+     *
+     * @param teamId the team ID to filter by
+     * @return a specification that filters cards by team ID
+     */
+    public static Specification<Card> hasTeamId(Long teamId) {
+        return (root, query, criteriaBuilder) -> {
+            if (teamId == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("team").get("id"), teamId);
+        };
+    }
+
+    /**
      * Creates a specification to filter cards by title (case-insensitive, contains)
      *
      * @param title the title to filter by

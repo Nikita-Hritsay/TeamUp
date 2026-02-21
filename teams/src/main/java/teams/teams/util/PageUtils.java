@@ -4,7 +4,9 @@ import org.springframework.data.domain.Page;
 import teams.teams.api.model.CardResponseDto;
 import teams.teams.api.model.PagingCardResponseDto;
 import teams.teams.api.model.PagingTeamMemberResponseDto;
+import teams.teams.api.model.PagingTeamResponseDto;
 import teams.teams.api.model.TeamMemberResponseDto;
+import teams.teams.api.model.TeamResponseDto;
 
 public class PageUtils {
 
@@ -36,6 +38,22 @@ public class PageUtils {
      */
     public static PagingTeamMemberResponseDto toPagingTeamMemberResponseDto(Page<TeamMemberResponseDto> page) {
         PagingTeamMemberResponseDto pagingDto = new PagingTeamMemberResponseDto();
+        pagingDto.setContent(page.getContent());
+        pagingDto.setTotalElements(page.getTotalElements());
+        pagingDto.setTotalPages(page.getTotalPages());
+        pagingDto.setNumber(page.getNumber());
+        pagingDto.setSize(page.getSize());
+        return pagingDto;
+    }
+
+    /**
+     * Converts a Spring Page of TeamResponseDto to PagingTeamResponseDto
+     *
+     * @param page the Spring Page object containing teams
+     * @return PagingTeamResponseDto containing the paginated team data
+     */
+    public static PagingTeamResponseDto toPagingTeamResponseDto(Page<TeamResponseDto> page) {
+        PagingTeamResponseDto pagingDto = new PagingTeamResponseDto();
         pagingDto.setContent(page.getContent());
         pagingDto.setTotalElements(page.getTotalElements());
         pagingDto.setTotalPages(page.getTotalPages());

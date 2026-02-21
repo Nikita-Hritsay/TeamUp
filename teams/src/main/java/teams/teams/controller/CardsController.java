@@ -117,13 +117,14 @@ public class CardsController implements CardsApi {
     public ResponseEntity<PagingCardResponseDto> getAllCards(
             @RequestParam(required = false) Long ownerId,
             @RequestParam(required = false) String title,
+            @RequestParam(required = false) Long teamId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         // If filtering parameters are provided, use filtered search
-        if (ownerId != null || (title != null && !title.isEmpty())) {
-            Page<CardResponseDto> filteredCards = cardsService.getFilteredCards(ownerId, title, pageable);
+        if (ownerId != null || (title != null && !title.isEmpty()) || teamId != null) {
+            Page<CardResponseDto> filteredCards = cardsService.getFilteredCards(ownerId, title, teamId, pageable);
             return ResponseEntity.ok(PageUtils.toPagingCardResponseDto(filteredCards));
         }
 
@@ -206,12 +207,12 @@ public class CardsController implements CardsApi {
     }
 
     @Override
-    public ResponseEntity<PagingCardResponseDto> getAllCards(Long ownerId, String title, Integer page, Integer size) {
+    public ResponseEntity<PagingCardResponseDto> getAllCards(Long ownerId, String title, Long teamId, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 10);
 
         // If filtering parameters are provided, use filtered search
-        if (ownerId != null || (title != null && !title.isEmpty())) {
-            Page<CardResponseDto> filteredCards = cardsService.getFilteredCards(ownerId, title, pageable);
+        if (ownerId != null || (title != null && !title.isEmpty()) || teamId != null) {
+            Page<CardResponseDto> filteredCards = cardsService.getFilteredCards(ownerId, title, teamId, pageable);
             return ResponseEntity.ok(PageUtils.toPagingCardResponseDto(filteredCards));
         }
 

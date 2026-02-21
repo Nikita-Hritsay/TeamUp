@@ -2,124 +2,87 @@
 
 ## Overview
 
-The Teams Service manages team-related operations and team membership in the microservices system. It provides functionality for creating and managing teams, handling team memberships, and managing team-specific configurations.
+Teams microservice: teams, cards, and team members. Uses Spring Cloud Config, Eureka, OpenFeign, MySQL, and OpenAPI code generation from an OpenAPI spec. REST API is defined in `src/main/resources/openapi/openapi.yml`; Spring controllers implement the generated API interfaces. Authentication is enforced at the Gateway (Keycloak JWT); this service is called with a valid token.
 
-## Main Features
+## Spring / Java Versions
 
-- Team creation and management
-- Team membership operations
-- Team roles and permissions
-- Team settings and preferences
-- Team collaboration features
-- Integration with Users Service for member management
+- **Spring Boot**: 3.2.3
+- **Spring Cloud**: 2023.0.0
+- **Java**: 21
 
-## API Endpoints
+## Main Dependencies
 
-The service exposes the following main endpoints:
+- `spring-boot-starter-web`, `spring-boot-starter-data-jpa`, `spring-boot-starter-validation`
+- `mysql-connector-j`
+- `spring-cloud-starter-config`, `spring-cloud-starter-netflix-eureka-client`, `spring-cloud-starter-openfeign`
+- `springdoc-openapi-starter-webmvc-ui` (2.6.0)
+- `openapi-generator-maven-plugin` (7.4.0) — generates API interfaces and models from `openapi.yml`
+- `spring-boot-starter-actuator`
 
-```
-POST   /api/v1/teams              # Create new team
-GET    /api/v1/teams              # List all teams
-GET    /api/v1/teams/{id}         # Get team details
-PUT    /api/v1/teams/{id}         # Update team information
-DELETE /api/v1/teams/{id}         # Delete team
+## Docker / Image
 
-POST   /api/v1/teams/{id}/members # Add team member
-DELETE /api/v1/teams/{id}/members/{userId} # Remove team member
-GET    /api/v1/teams/{id}/members # List team members
-```
+- **Build**: Jib. Image: `mykyta2/teams:s1`.
+- **Build command**:
+  ```bash
+  mvn -f teams/pom.xml clean compile jib:build
+  ```
+  (OpenAPI generation runs in `generate-sources` phase.)
+
+## Security
+
+- No login or JWT issuance in this service. The API Gateway validates Keycloak JWTs for `/TEAMS/**` and forwards. This service is backend-only from the gateway.
 
 ## Configuration
 
-The service uses Spring Cloud Config Server for its configuration. Local configurations can be found in:
-
-### application.yml
-```yaml
-spring:
-  application:
-    name: teams
-  datasource:
-    url: jdbc:postgresql://localhost:5432/teams_db
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-
-server:
-  port: 8081
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8070/eureka/
-```
-
-### application-docker.yml
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://teams-db:5432/teams_db
-    
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://eureka-server:8070/eureka/
-```
-
-## Dependencies
-
-- Spring Boot
-- Spring Cloud Config Client
-- Spring Data JPA
-- PostgreSQL
-- Netflix Eureka Client
-- Spring Cloud OpenFeign (for service communication)
+- **Config Server**: `configs/teams.yaml`, `teams-qa.yml`, `teams-prod.yml`.
+- **Docker**: Compose sets `SPRING_APPLICATION_NAME: teams`, `SPRING_DATASOURCE_URL: jdbc:mysql://teamsdb:3306/teamsdb`. DB credentials from `common-config.yml`.
 
 ## Database
 
-The service uses PostgreSQL for data persistence with the following main entities:
-- Team
-- TeamMember
-- TeamRole
-- TeamSettings
+- **MySQL**. Database: `teamsdb`. Compose: `teamsdb`, host port 3308 → 3306. Schema via JPA.
 
-## Service Integration
+## OpenAPI
 
-- Integrates with Users Service for member validation and user information
-- Uses OpenFeign clients for inter-service communication
-- Implements circuit breakers for resilient service calls
+- **Spec**: `src/main/resources/openapi/openapi.yml` (OpenAPI 3.0.3). Defines Cards and Teams (and possibly other) tags and paths.
+- **Code generation**: Maven plugin generates Spring interfaces and models into `target/generated-sources/openapi`; `build-helper-maven-plugin` adds that as source.
+- **Runtime docs**: Springdoc serves Swagger UI. When running:
+  - Direct: `http://localhost:8081/swagger-ui.html` (or port from config).
+  - Via Gateway: `http://localhost:8072/TEAMS/swagger-ui.html` (path depends on gateway rewrite).
 
-## Docker Support
+## API Endpoints (summary from spec)
 
-The service is containerized and can be run using Docker. Environment variables that can be configured:
-- `DB_USERNAME`: Database username
-- `DB_PASSWORD`: Database password
-- `SPRING_PROFILES_ACTIVE`: Active Spring profile
+- **Cards**: e.g. `GET /api/v1/cards/build-version`, `POST/GET /api/v1/cards`, and other card CRUD.
+- **Teams**: Team CRUD and team members (paths as in `openapi.yml`).  
+Exact operations and schemas: see `openapi.yml` or Swagger UI.
 
-## Service Dependencies
+## Steps to Run
 
-- Requires Spring Cloud Config Server for configuration
-- Registers with Eureka Server for service discovery
-- Connects to PostgreSQL database
-- Depends on Users Service for user information
+### Local
+
+1. MySQL (`teamsdb`), Config Server (8071), Eureka (8070).
+2. Configure datasource and optional `SPRING_CONFIG_IMPORT`.
+3. Run:
+   ```bash
+   mvn -f teams/pom.xml spring-boot:run
+   ```
+4. Default port 8081. Health: `GET /actuator/health/readiness`.
+
+### Docker Compose
+
+```bash
+docker compose -f docker-compose/default/docker-compose.yml up -d
+```
+
+`teams` starts after Config Server and Eureka; uses `teamsdb`.
+
+## General Flow
+
+1. Config Server provides `teams` (and profile) configuration.
+2. Service registers with Eureka (e.g. as `TEAMS`).
+3. Gateway routes `/TEAMS/**` to this service with path rewrite to `/**`.
+4. Client sends `Authorization: Bearer <Keycloak JWT>`; gateway validates and forwards.
+5. Controllers implement generated API interfaces; persistence via JPA.
 
 ## Monitoring
 
-Health and metrics endpoints are available through Spring Boot Actuator:
-```
-/actuator/health    # Health check endpoint
-/actuator/metrics   # Metrics endpoint
-/actuator/info      # Service information
-```
-
-## Error Handling
-
-The service implements global error handling for:
-- Invalid team operations
-- Member management errors
-- Database constraints
-- Service communication failures 
+- **Actuator**: Health (readiness/liveness), metrics. Compose healthcheck uses `/actuator/health/readiness`.

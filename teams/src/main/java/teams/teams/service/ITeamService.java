@@ -10,6 +10,11 @@ import java.util.List;
 public interface ITeamService {
 
     /**
+     * List teams with pagination. When userId is provided, returns only teams where that user is a member.
+     */
+    Page<TeamResponseDto> listTeams(Pageable pageable, Long userId);
+
+    /**
      * Processes a request from a user to join a team/project
      * 
      * @param teamMemberRequestDto the request data containing user ID and role
@@ -69,4 +74,9 @@ public interface ITeamService {
     List<TeamMemberResponseDto> getTeamsByMember(Long userId);
 
     TeamResponseDto fetchTeam(Long teamId);
+
+    /**
+     * Gets all team members for a team with pagination (by team ID).
+     */
+    Page<TeamMemberResponseDto> getTeamMembersByTeamId(Long teamId, Pageable pageable);
 }

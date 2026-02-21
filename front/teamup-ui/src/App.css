@@ -33,6 +33,26 @@
   background: #e2e8f0;
 }
 
+.nav-user {
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  color: #475569;
+}
+
+.nav-logout {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d0d7de;
+  background: #f6f8fa;
+  color: #0f172a;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.nav-logout:hover {
+  background: #e2e8f0;
+}
+
 section {
   display: flex;
   flex-direction: column;

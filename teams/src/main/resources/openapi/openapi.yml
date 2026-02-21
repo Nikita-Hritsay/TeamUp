@@ -73,6 +73,13 @@ paths:
           schema:
             type: string
           description: Filter by title
+        - name: teamId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+          description: Filter by team ID
         - name: page
           in: query
           required: false
@@ -238,6 +245,43 @@ paths:
               schema:
                 type: string
                 example: "1.0.0"
+
+  /api/v1/teams:
+    get:
+      tags:
+        - Teams
+      summary: List Teams REST API
+      description: Get all teams with pagination. Optionally filter by userId to get teams where the user is a member (my teams).
+      operationId: listTeams
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: Page number (0-indexed)
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Page size
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+          description: When set, return only teams where this user is a member (my teams)
+      responses:
+        '200':
+          description: HTTP Status OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagingTeamResponseDto'
 
   /api/v1/teams/create:
     post:
@@ -453,6 +497,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TeamResponseDto'
+
+  /api/v1/teams/{teamId}/members:
+    get:
+      tags:
+        - Teams
+      summary: Get Team Members by Team ID REST API
+      description: Get all members of a team with pagination
+      operationId: getTeamMembersByTeamId
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Team ID
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: Page number (0-indexed)
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Page size
+      responses:
+        '200':
+          description: HTTP Status OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagingTeamMemberResponseDto'
 
 components:
   schemas:
@@ -721,5 +802,16 @@ components:
               description: List of team members in the current page
               items:
                 $ref: '#/components/schemas/TeamMemberResponseDto'
+
+    PagingTeamResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/PagingDto'
+        - type: object
+          properties:
+            content:
+              type: array
+              description: List of teams in the current page
+              items:
+                $ref: '#/components/schemas/TeamResponseDto'
 
 

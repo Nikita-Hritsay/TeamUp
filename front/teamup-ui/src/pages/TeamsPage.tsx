@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { createTeam, getTeamMembers } from '../api/teamsApi'
-import type { TeamMemberDto, TeamRequestDto, PageResponse } from '../types'
+import { useNavigate } from '../routerShim'
+import { createTeam, listTeams } from '../api/teamsApi'
+import type { TeamRequestDto, TeamResponseDto, PageResponse } from '../types'
+
+const PAGE_SIZE = 10
 
 export function TeamsPage() {
+  const navigate = useNavigate()
   const [teamForm, setTeamForm] = useState<TeamRequestDto>({
     name: '',
     description: '',
@@ -11,12 +15,29 @@ export function TeamsPage() {
   const [teamMessage, setTeamMessage] = useState('')
   const [teamError, setTeamError] = useState('')
 
-  const [membersCardId, setMembersCardId] = useState('')
-  const [membersPage, setMembersPage] = useState<PageResponse<TeamMemberDto> | null>(null)
-  const [membersError, setMembersError] = useState('')
-  const [membersLoading, setMembersLoading] = useState(false)
-  const [membersPageNum, setMembersPageNum] = useState(0)
-  const [membersPageSize, setMembersPageSize] = useState(10)
+  const [page, setPage] = useState(0)
+  const [teamsPage, setTeamsPage] = useState<PageResponse<TeamResponseDto> | null>(null)
+  const [teamsError, setTeamsError] = useState('')
+  const [teamsLoading, setTeamsLoading] = useState(false)
+
+  useEffect(() => {
+    const load = async () => {
+      setTeamsLoading(true)
+      setTeamsError('')
+      try {
+        const data = await listTeams({ page, size: PAGE_SIZE })
+        setTeamsPage(data)
+      } catch (err) {
+        setTeamsError(err instanceof Error ? err.message : 'Unable to load teams.')
+        setTeamsPage(null)
+      } finally {
+        setTeamsLoading(false)
+      }
+    }
+    load()
+  }, [page])
+
+  const totalPages = useMemo(() => teamsPage?.totalPages ?? 0, [teamsPage])
 
   const handleCreateTeam = async (event: FormEvent) => {
     event.preventDefault()
@@ -30,46 +51,17 @@ export function TeamsPage() {
       await createTeam(teamForm)
       setTeamMessage('Team created successfully.')
       setTeamForm({ name: '', description: '' })
+      setPage(0)
+      const data = await listTeams({ page: 0, size: PAGE_SIZE })
+      setTeamsPage(data)
     } catch (err) {
       setTeamError(err instanceof Error ? err.message : 'Unable to create team.')
     }
   }
 
-  const handleFetchMembers = async (event?: FormEvent) => {
-    if (event) event.preventDefault()
-    const parsedCardId = Number(membersCardId)
-    if (!parsedCardId) {
-      setMembersError('Please provide a valid Card ID.')
-      setMembersPage(null)
-      return
-    }
-    setMembersError('')
-    setMembersLoading(true)
-    try {
-      const data = await getTeamMembers(parsedCardId, {
-        page: membersPageNum,
-        size: membersPageSize,
-      })
-      setMembersPage(data)
-    } catch (err) {
-      setMembersError(err instanceof Error ? err.message : 'Unable to load members.')
-      setMembersPage(null)
-    } finally {
-      setMembersLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    if (membersCardId) {
-      handleFetchMembers()
-    }
-  }, [membersPageNum, membersPageSize])
-
-  const totalMembersPages = useMemo(() => membersPage?.totalPages ?? 0, [membersPage])
-
   return (
     <section>
-      <h2>Teams</h2>
+      <h2>My Teams</h2>
       <div className="panel">
         <h3>Create Team</h3>
         <form className="form" onSubmit={handleCreateTeam}>
@@ -87,7 +79,7 @@ export function TeamsPage() {
           <label className="form-field">
             <span>Description</span>
             <textarea
-              value={teamForm.description}
+              value={teamForm.description ?? ''}
               onChange={(event) =>
                 setTeamForm((prev) => ({ ...prev, description: event.target.value }))
               }
@@ -100,86 +92,53 @@ export function TeamsPage() {
       </div>
 
       <div className="panel">
-        <h3>Team Members by Card</h3>
-        <form className="form inline-form" onSubmit={handleFetchMembers}>
-          <label className="form-field">
-            <span>Card ID</span>
-            <input
-              type="number"
-              min={1}
-              value={membersCardId}
-              onChange={(event) => {
-                setMembersCardId(event.target.value)
-                setMembersPageNum(0)
-              }}
-              required
-            />
-          </label>
-          <label className="form-field small">
-            <span>Page Size</span>
-            <input
-              type="number"
-              min={1}
-              max={50}
-              value={membersPageSize}
-              onChange={(event) => {
-                const nextSize = Number(event.target.value)
-                setMembersPageSize(Number.isNaN(nextSize) ? 10 : nextSize)
-                setMembersPageNum(0)
-              }}
-            />
-          </label>
-          <button type="submit" disabled={membersLoading}>
-            {membersLoading ? 'Loading…' : 'Load Members'}
-          </button>
-        </form>
-        {membersError && <div className="error">{membersError}</div>}
-        {membersLoading && <p>Loading members…</p>}
-        {!membersLoading && membersPage && (
+        <h3>Your teams</h3>
+        {teamsLoading && <p>Loading teams…</p>}
+        {teamsError && <div className="error">{teamsError}</div>}
+        {!teamsLoading && teamsPage && (
           <>
-            {membersPage.content.length === 0 ? (
-              <p className="muted">No members to display.</p>
+            {teamsPage.content.length === 0 ? (
+              <p className="muted">No teams yet. Create one above.</p>
             ) : (
               <>
                 <ul className="list">
-                  {membersPage.content.map((member) => (
+                  {teamsPage.content.map((team) => (
                     <li
-                      key={member.id ?? `${member.userId}-${member.teamId}`}
+                      key={team.id}
                       className="list-item"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => navigate(`/teams/${team.id}`)}
                     >
                       <div className="list-title">
-                        <strong>User {member.userId}</strong>
-                        <span className="muted">Team {member.teamId}</span>
+                        <strong>{team.name}</strong>
+                        <span className="muted">Team #{team.id}</span>
                       </div>
-                      <p className="muted">
-                        Role: {member.role} {member.status ? `• Status: ${member.status}` : ''}
-                      </p>
-                      {member.cardId && <p className="muted">Card: {member.cardId}</p>}
+                      {team.description && (
+                        <p className="muted">
+                          {team.description.length > 100
+                            ? `${team.description.substring(0, 100)}...`
+                            : team.description}
+                        </p>
+                      )}
                     </li>
                   ))}
                 </ul>
-                {totalMembersPages > 0 && (
+                {totalPages > 1 && (
                   <div className="pagination">
                     <button
                       type="button"
-                      onClick={() => setMembersPageNum((prev) => Math.max(prev - 1, 0))}
-                      disabled={membersPageNum === 0}
+                      onClick={() => setPage((p) => Math.max(0, p - 1))}
+                      disabled={page === 0}
                     >
                       Previous
                     </button>
                     <span>
-                      Page {membersPageNum + 1} of {totalMembersPages}
+                      Page {page + 1} of {totalPages}
                     </span>
                     <button
                       type="button"
-                      onClick={() =>
-                        setMembersPageNum((prev) =>
-                          membersPage.totalPages
-                            ? Math.min(prev + 1, totalMembersPages - 1)
-                            : prev,
-                        )
-                      }
-                      disabled={membersPageNum + 1 >= totalMembersPages}
+                      onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                      disabled={page + 1 >= totalPages}
                     >
                       Next
                     </button>
@@ -189,11 +148,7 @@ export function TeamsPage() {
             )}
           </>
         )}
-        {!membersLoading && !membersPage && !membersCardId && (
-          <p className="muted">Enter a Card ID to load team members.</p>
-        )}
       </div>
     </section>
   )
 }
-

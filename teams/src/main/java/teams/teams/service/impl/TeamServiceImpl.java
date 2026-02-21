@@ -137,4 +137,19 @@ public class TeamServiceImpl implements ITeamService {
         return TeamMapper.mapToTeamResponseDto(teamRepository.findById(teamId).orElseThrow(() -> new ResourceNotFoundException("Team", "team Id",
                 teamId.toString())));
     }
+
+    @Override
+    public Page<TeamResponseDto> listTeams(Pageable pageable, Long userId) {
+        Page<Team> teamPage = userId != null
+                ? teamRepository.findTeamsByMemberUserId(userId, pageable)
+                : teamRepository.findAll(pageable);
+        return teamPage.map(TeamMapper::mapToTeamResponseDtoSummary);
+    }
+
+    @Override
+    public Page<TeamMemberResponseDto> getTeamMembersByTeamId(Long teamId, Pageable pageable) {
+        teamRepository.findById(teamId).orElseThrow(() -> new ResourceNotFoundException("Team", "teamId", teamId.toString()));
+        Page<TeamMember> memberPage = teamMemberRepository.findByTeamId(teamId, pageable);
+        return memberPage.map(TeamMapper::mapToTeamMemberResponseDto);
+    }
 }

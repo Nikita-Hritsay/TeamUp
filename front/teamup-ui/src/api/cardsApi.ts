@@ -1,33 +1,14 @@
 import type { CardRequestDto, CardResponseDto, PageResponse, ResponseDto } from '../types'
+import { fetchWithAuth, handleResponse } from './client'
 
-const BASE_URL = 'http://localhost:8081/api/v1/cards'
-
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    let message = 'Request failed'
-    try {
-      const data = await response.json()
-      message =
-        (data && (data.statusMessage || data.message || data.error)) ?? message
-    } catch {
-      const text = await response.text()
-      if (text) message = text
-    }
-    throw new Error(message)
-  }
-
-  if (response.status === 204) {
-    return {} as T
-  }
-
-  return response.json() as Promise<T>
-}
+const BASE_URL = import.meta.env.VITE_CARDS_API_URL ?? 'http://localhost:8081/api/v1/cards'
 
 export async function fetchCards(params: {
   page?: number
   size?: number
   ownerId?: number
   title?: string
+  teamId?: number
 }) {
   const url = new URL(BASE_URL)
   if (params.page !== undefined) url.searchParams.set('page', String(params.page))
@@ -35,26 +16,26 @@ export async function fetchCards(params: {
   if (params.ownerId !== undefined)
     url.searchParams.set('ownerId', String(params.ownerId))
   if (params.title) url.searchParams.set('title', params.title)
+  if (params.teamId !== undefined) url.searchParams.set('teamId', String(params.teamId))
 
-  const response = await fetch(url.toString())
+  const response = await fetchWithAuth(url.toString())
   return handleResponse<PageResponse<CardResponseDto>>(response)
 }
 
 export async function getCardById(cardId: number) {
   const url = `${BASE_URL}/fetch?cardId=${encodeURIComponent(cardId)}`
-  const response = await fetch(url)
+  const response = await fetchWithAuth(url)
   return handleResponse<CardResponseDto>(response)
 }
 
 export async function getCardsByUser(userId: number) {
   const url = `${BASE_URL}/fetchByUser?userId=${encodeURIComponent(userId)}`
-  const response = await fetch(url)
+  const response = await fetchWithAuth(url)
   return handleResponse<CardResponseDto[]>(response)
 }
 
 export async function createCard(payload: CardRequestDto) {
-    console.log(payload)
-  const response = await fetch(BASE_URL, {
+  const response = await fetchWithAuth(BASE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -63,7 +44,7 @@ export async function createCard(payload: CardRequestDto) {
 }
 
 export async function updateCard(cardId: number, payload: CardRequestDto) {
-  const response = await fetch(`${BASE_URL}/${cardId}`, {
+  const response = await fetchWithAuth(`${BASE_URL}/${cardId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -72,6 +53,6 @@ export async function updateCard(cardId: number, payload: CardRequestDto) {
 }
 
 export async function deleteCard(cardId: number) {
-  const response = await fetch(`${BASE_URL}/${cardId}`, { method: 'DELETE' })
+  const response = await fetchWithAuth(`${BASE_URL}/${cardId}`, { method: 'DELETE' })
   return handleResponse<ResponseDto>(response)
 }

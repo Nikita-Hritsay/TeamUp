@@ -1,6 +1,8 @@
 package teams.teams.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -206,10 +208,46 @@ public class TeamController implements TeamsApi {
         return ResponseEntity.ok(teamResponseDto);
     }
 
+    @Operation(
+            summary = "List Teams REST API",
+            description = "Get all teams with pagination. Optionally filter by userId for teams where the user is a member."
+    )
+    @ApiResponse(responseCode = "200", description = "HTTP Status OK")
+    @GetMapping
+    public ResponseEntity<PagingTeamResponseDto> listTeams(
+            @Parameter(name = "page", description = "Page number (0-indexed)", in = ParameterIn.QUERY) @Valid @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+            @Parameter(name = "size", description = "Page size", in = ParameterIn.QUERY) @Valid @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
+            @Parameter(name = "userId", description = "When set, return only teams where this user is a member (my teams)", in = ParameterIn.QUERY) @Valid @RequestParam(value = "userId", required = false) Long userId
+    ) {
+        Pageable pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 10);
+        Page<TeamResponseDto> teamPage = teamService.listTeams(pageable, userId);
+        return ResponseEntity.ok(PageUtils.toPagingTeamResponseDto(teamPage));
+    }
+
+    @Operation(
+            summary = "Get Team Members by Team ID REST API",
+            description = "Get all members of a team with pagination"
+    )
+    @ApiResponse(responseCode = "200", description = "HTTP Status OK")
+    @GetMapping("/{teamId}/members")
+    public ResponseEntity<PagingTeamMemberResponseDto> getTeamMembersByTeamId(
+            @PathVariable Long teamId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<TeamMemberResponseDto> members = teamService.getTeamMembersByTeamId(teamId, pageable);
+        return ResponseEntity.ok(PageUtils.toPagingTeamMemberResponseDto(members));
+    }
+
     @Override
     public ResponseEntity<PagingTeamMemberResponseDto> getTeamMembers(Long cardId, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 10);
         Page<TeamMemberResponseDto> teamMembers = teamService.getTeamMembers(cardId, pageable);
         return ResponseEntity.ok(PageUtils.toPagingTeamMemberResponseDto(teamMembers));
+    }
+
+    @Override
+    public ResponseEntity<PagingTeamMemberResponseDto> getTeamMembersByTeamId(Long teamId, Integer page, Integer size) {
+        return null;
     }
 }

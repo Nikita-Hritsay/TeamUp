@@ -1,14 +1,39 @@
 # Microservices System with Spring Boot
 
+## Module documentation
 
-How to create users:
-* Open Keycloak
-* Create Realm TeamUp
-* added Client with  Client Authentication On and Service Account On (this will be for Client Creds scope)
-* also create one for Users as Standard Flow - this one is for Users
-* Postman json is in the Config module - resources folder;
+Each module has its own README with details on versions, Docker, security, OpenAPI, and how to run:
 
-Keycloak admin panel - http://localhost:7080/realms/TeamUp/.well-known/openid-configuration
+| Module | README | Description |
+|--------|--------|--------------|
+| **Front (TeamUp UI)** | [front/teamup-ui/README.md](front/teamup-ui/README.md) | React + Vite SPA; Keycloak Auth Code + PKCE |
+| **Eureka Server** | [eureka-server/README.md](eureka-server/README.md) | Service discovery |
+| **Config Server** | [spring-cloud-server/README.md](spring-cloud-server/README.md) | Centralized configuration (native) |
+| **Gateway Server** | [gateway-server/README.md](gateway-server/README.md) | API gateway, JWT validation, routes |
+| **Users Service** | [users/README.md](users/README.md) | User CRUD, MySQL, OpenAPI |
+| **Teams Service** | [teams/README.md](teams/README.md) | Teams & cards, MySQL, OpenAPI codegen |
+| **Message Service** | [message/README.md](message/README.md) | Spring Cloud Stream (Kafka/Rabbit) consumer |
+
+---
+
+## Keycloak
+
+Authentication and token issuance are handled by **Keycloak**. The Gateway validates JWTs; it does not issue tokens.
+
+- **Keycloak (identity & flows)**: See **[docs/KEYCLOAK.md](docs/KEYCLOAK.md)** for:
+  - **Authorization Code + PKCE** — used by the TeamUp UI (browser, no client secret)
+  - **Client Credentials** — for server-to-server or scripts (client id + secret)
+  - Realm and client setup (public client for UI, confidential for client creds)
+  - Endpoints (auth, token, logout, JWK Set) and Gateway integration
+
+Quick setup reminder:
+- Create realm **TeamUp**
+- Public client (e.g. `teamup-public`) with **Standard Flow** and redirect URI `http://localhost:5173/callback` for the UI
+- Optional: confidential client with **Client authentication** and **Service accounts** for client credentials
+- OIDC discovery: http://localhost:7080/realms/TeamUp/.well-known/openid-configuration
+
+Postman collections (if any) are in the Config module resources folder.
+
 ---
 
 ## High-Level Architecture
@@ -111,10 +136,10 @@ Docker Compose already includes these databases, so manual creation is optional.
 
 ## Running the System
 
-To start everything:
+From the repo root, using the default Compose file:
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose/default/docker-compose.yml up -d
 ```
 
 Docker Compose will:

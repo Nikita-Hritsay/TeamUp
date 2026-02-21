@@ -2,109 +2,89 @@
 
 ## Overview
 
-The Users Service is responsible for managing user accounts, authentication, and user-related operations in the microservices system. It provides core functionality for user management and serves as the authentication provider for other services.
+Users microservice: user CRUD, profiles, and integration with Teams (e.g. team members). It uses Spring Cloud Config, Eureka, OpenFeign, and Spring Cloud Stream (Kafka binder). REST API is documented with Springdoc OpenAPI. Authentication is handled by Keycloak at the Gateway; this service is called with a valid JWT and does not perform login itself.
 
-## Main Features
+## Spring / Java Versions
 
-- User registration and account management
-- Authentication and authorization
-- User profile management
-- Password reset functionality
-- Role-based access control
-- User preferences management
+- **Spring Boot**: 3.2.3
+- **Spring Cloud**: 2023.0.0
+- **Java**: 21
 
-## API Endpoints
+## Main Dependencies
 
-The service exposes the following main endpoints:
+- `spring-boot-starter-web`, `spring-boot-starter-data-jpa`, `spring-boot-starter-validation`
+- `mysql-connector-j`
+- `spring-cloud-starter-config`, `spring-cloud-starter-netflix-eureka-client`, `spring-cloud-starter-openfeign`
+- `spring-cloud-stream`, `spring-cloud-stream-binder-kafka`
+- `springdoc-openapi-starter-webmvc-ui` (2.3.0)
+- `spring-boot-starter-actuator`
 
-```
-POST   /api/v1/users/register     # Register new user
-POST   /api/v1/users/login        # User authentication
-GET    /api/v1/users/{id}         # Get user details
-PUT    /api/v1/users/{id}         # Update user information
-DELETE /api/v1/users/{id}         # Delete user account
-```
+## Docker / Image
 
-## Configuration
-
-The service uses Spring Cloud Config Server for its configuration. Local configurations can be found in:
-
-### application.yml
-```yaml
-spring:
-  application:
-    name: users
-  datasource:
-    url: jdbc:postgresql://localhost:5432/users_db
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-
-server:
-  port: 8080
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8070/eureka/
-```
-
-### application-docker.yml
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://users-db:5432/users_db
-    
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://eureka-server:8070/eureka/
-```
-
-## Dependencies
-
-- Spring Boot
-- Spring Cloud Config Client
-- Spring Data JPA
-- PostgreSQL
-- Spring Security
-- Netflix Eureka Client
-
-## Database
-
-The service uses PostgreSQL for data persistence. The database schema is managed through JPA entities and Flyway migrations.
+- **Build**: Jib. Image: `mykyta2/users:s1` (must match `docker-compose`).
+- **Build command**:
+  ```bash
+  mvn -f users/pom.xml clean compile jib:build
+  ```
 
 ## Security
 
-- JWT-based authentication
-- Password encryption using BCrypt
-- Role-based authorization
-- API endpoint security
+- This service does **not** implement login or JWT issuance. The API Gateway validates Keycloak JWTs and forwards requests. Users service can trust the gateway or optionally validate JWT again; by default it is called after gateway auth.
+- No Spring Security configuration is required in this module for the gateway-to-service flow; the gateway enforces authentication for `/USERS/**`.
 
-## Docker Support
+## Configuration
 
-The service is containerized and can be run using Docker. Environment variables that can be configured:
-- `DB_USERNAME`: Database username
-- `DB_PASSWORD`: Database password
-- `JWT_SECRET`: Secret key for JWT token generation
-- `SPRING_PROFILES_ACTIVE`: Active Spring profile
+- **Config Server**: Service-specific config in `configs/users.yml` (e.g. `build.version`). Profiles: `users-qa.yml`, `users-prod.yml`.
+- **Local**: Bootstrap uses optional `configserver:http://localhost:8071/`. Datasource and Eureka URL come from config or environment.
+- **Docker**: Compose sets `SPRING_APPLICATION_NAME: users`, `SPRING_DATASOURCE_URL: jdbc:mysql://usersdb:3306/userdb`, and `SPRING_RABBITMQ_HOST: rabbit`. DB credentials from `common-config.yml` (e.g. root/root).
 
-## Service Dependencies
+## Database
 
-- Requires Spring Cloud Config Server for configuration
-- Registers with Eureka Server for service discovery
-- Connects to PostgreSQL database
+- **MySQL**. Database: `userdb`. Schema managed by JPA (Hibernate). Compose service: `usersdb`, port 3306.
+
+## OpenAPI Docs
+
+- **Springdoc** is included; when the service is running, Swagger UI is typically at:
+  - Direct: `http://localhost:8083/swagger-ui.html` (port 8083 as in Compose healthcheck).
+  - Via Gateway: `http://localhost:8072/USERS/swagger-ui.html` (if the app is mounted at `/` and gateway rewrites `/USERS/**` to `/api/v1/...` as configured—confirm path rewrite in gateway).
+
+## API Endpoints (summary)
+
+- `POST /api/v1/users/register` — Register (may delegate to Keycloak or local DB depending on design).
+- `POST /api/v1/users/login` — Login (if used; otherwise auth is Keycloak-only).
+- `GET /api/v1/users/{id}` — Get user.
+- `PUT /api/v1/users/{id}` — Update user.
+- `DELETE /api/v1/users/{id}` — Delete user.  
+Exact paths and request/response shapes are in the OpenAPI spec (Swagger UI).
+
+## Steps to Run
+
+### Local
+
+1. MySQL running (e.g. `userdb` on 3306), Config Server (8071), Eureka (8070).
+2. Set `SPRING_DATASOURCE_URL`, credentials, and optionally `SPRING_CONFIG_IMPORT=configserver:http://localhost:8071/`.
+3. Run:
+   ```bash
+   mvn -f users/pom.xml spring-boot:run
+   ```
+4. Service port: 8083 (from config). Health: `GET /actuator/health/readiness`.
+
+### Docker Compose
+
+```bash
+docker compose -f docker-compose/default/docker-compose.yml up -d
+```
+
+`users` starts after Config Server and Eureka are healthy; uses `usersdb` and `rabbit`.
+
+## General Flow
+
+1. Config Server provides `users` (and profile) configuration.
+2. Service registers with Eureka as `USERS` (or name from config).
+3. Gateway routes `GET /USERS/api/v1/...` to this service (path rewritten to `/api/v1/...`).
+4. Client sends `Authorization: Bearer <Keycloak JWT>`; gateway validates and forwards; service processes request.
+5. Optional: events published to Kafka/Rabbit for message service (e.g. user created).
 
 ## Monitoring
 
-Health and metrics endpoints are available through Spring Boot Actuator:
-```
-/actuator/health    # Health check endpoint
-/actuator/metrics   # Metrics endpoint
-/actuator/info      # Service information
-``` 
+- **Actuator**: Health (readiness/liveness), metrics, info. Endpoints exposed as per config. Use `/actuator/health/readiness` for orchestration.

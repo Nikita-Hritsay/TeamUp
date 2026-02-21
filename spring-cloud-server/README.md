@@ -2,92 +2,85 @@
 
 ## Overview
 
-The Spring Cloud Config Server is a centralized configuration service that manages all configuration properties for the microservices in the system. It provides a reliable and scalable way to externalize configuration across multiple applications and environments.
+Centralized configuration server for TeamUp microservices. Uses **native** profile with configs on the classpath (`classpath:/configs`). No Git backend in the default setup. All services that extend `microservice-configserver-config` in Docker get their bootstrap from this server.
 
-## Key Features
+## Spring / Java Versions
 
-- Centralized configuration management for all microservices
-- Git-backed configuration storage
-- Environment-specific configuration support
-- Dynamic configuration updates
-- Encryption/decryption of sensitive properties
-- RESTful API for configuration access
+- **Spring Boot**: 3.5.0
+- **Spring Cloud**: 2025.0.0
+- **Java**: 21
 
-## Configuration Files
+## Main Dependencies
 
-The server manages the following types of configuration files:
-- `application.yml`: Default configuration shared across all services
-- `application-{profile}.yml`: Environment-specific configurations
-- `{service-name}.yml`: Service-specific default configuration
-- `{service-name}-{profile}.yml`: Service and environment-specific configuration
+- `spring-cloud-config-server`
+- `spring-boot-starter-actuator`
+- `spring-boot-starter-test`
 
-## Accessing Configurations
+## Docker / Image
 
-Services can access their configurations through the following URL patterns:
+- **Build**: Jib. Image: `mykyta2/config-server:s1`.
+- **Build command**:
+  ```bash
+  mvn -f spring-cloud-server/pom.xml clean compile jib:build
+  ```
 
-```
-http://localhost:8071/{service-name}/{profile}
-```
+## Configuration
 
-Example URLs:
-- `http://localhost:8071/users/default`
-- `http://localhost:8071/teams/docker`
+- **Server** (`application.yml`):
+  - Port: **8071**
+  - `spring.cloud.config.server.native.search-locations: "classpath:/configs"`
+  - Profile: `native` (no Git).
+- **Config files** (in `src/main/resources/configs/`):
+  - `gatewayserver.yml`, `eurekaserver.yml`
+  - `users.yml`, `users-qa.yml`, `users-prod.yml`
+  - `teams.yaml`, `teams-qa.yml`, `teams-prod.yml`
 
-## Server Configuration
-
-The Config Server itself is configured through `application.yml`:
-
-```yaml
-server:
-  port: 8071
-
-spring:
-  application:
-    name: spring-cloud-server
-  cloud:
-    config:
-      server:
-        git:
-          uri: ${CONFIG_REPO_URI:file:///config-repo}
-          default-label: ${CONFIG_REPO_BRANCH:master}
-          search-paths:
-            - '*'
-```
+Clients request config via: `GET http://config-server:8071/{application}/{profile}` (e.g. `users/default`).
 
 ## Security
 
-- The server can be configured with authentication
-- Sensitive properties can be encrypted
-- HTTPS should be enabled in production
+- No authentication is configured in the provided setup. Config can contain sensitive data; in production use HTTPS, restrict network access, and consider Spring Security or a secret manager. No JWT or Keycloak in this service.
 
-## Client Configuration
+## Steps to Run
 
-Services connecting to the Config Server need the following configuration:
+### Local
+
+```bash
+mvn -f spring-cloud-server/pom.xml spring-boot:run
+```
+
+Config Server: **http://localhost:8071**.  
+Example: `GET http://localhost:8071/users/default` (returns properties for `users` with profile `default`).
+
+### Docker Compose
+
+```bash
+docker compose -f docker-compose/default/docker-compose.yml up -d
+```
+
+Config Server starts after `usersdb` and `teamsdb` are healthy. Other services use `SPRING_CONFIG_IMPORT=configserver:http://config-server:8071/`.
+
+## General Flow
+
+1. Config Server loads YAML from `classpath:/configs` by application name and profile.
+2. Clients bootstrap with `spring.config.import=configserver:http://config-server:8071/` (or optional for local dev).
+3. Eureka, Gateway, Users, Teams (and optionally Message) get DB URLs, Eureka URL, build versions, etc., from this server.
+4. Health: `GET /actuator/health/readiness` and `/actuator/health/liveness` (used by Compose).
+
+## OpenAPI
+
+Config Server exposes no REST API docs; it serves configuration over HTTP. No OpenAPI/Swagger in this module.
+
+## Client Configuration (reference)
+
+Services that use Config Server typically set:
 
 ```yaml
 spring:
   config:
-    import: "optional:configserver:http://localhost:8071"
-  cloud:
-    config:
-      fail-fast: true
-      retry:
-        max-attempts: 6
-        initial-interval: 1000
-        max-interval: 2000
-        multiplier: 1.1
+    import: "optional:configserver:http://localhost:8071/"
+  application:
+    name: <service-name>
 ```
 
-## Health Check
-
-The Config Server's health can be monitored at:
-```
-http://localhost:8071/actuator/health
-```
-
-## Docker Support
-
-When running in Docker, the service is configured using environment variables:
-- `CONFIG_REPO_URI`: Git repository URL for configurations
-- `CONFIG_REPO_BRANCH`: Git branch to use (defaults to master)
-- `SPRING_PROFILES_ACTIVE`: Active profile for the server 
+Docker Compose sets `SPRING_CONFIG_IMPORT=configserver:http://config-server:8071/` for applicable services.

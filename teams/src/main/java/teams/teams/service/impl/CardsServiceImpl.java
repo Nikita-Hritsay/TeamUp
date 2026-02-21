@@ -90,11 +90,12 @@ public class CardsServiceImpl implements ICardsService {
     }
 
     @Override
-    public Page<CardResponseDto> getFilteredCards(Long ownerId, String title,
+    public Page<CardResponseDto> getFilteredCards(Long ownerId, String title, Long teamId,
                                                   Pageable pageable) {
         Specification<Card> spec = CardSpecification.where(
                 CardSpecification.hasOwnerId(ownerId),
-                CardSpecification.titleContains(title)
+                CardSpecification.titleContains(title),
+                CardSpecification.hasTeamId(teamId)
         );
 
         Page<Card> filteredCards = cardsRepository.findAll(spec, pageable);
