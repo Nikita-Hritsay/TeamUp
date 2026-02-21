@@ -3,3 +3,40 @@ target
 .mvn
 node_modules
 .data
+
+# Java
+*.class
+*.log
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Spring Boot
+application-*.properties
+application-*.yml
+!application.properties
+!application.yml
