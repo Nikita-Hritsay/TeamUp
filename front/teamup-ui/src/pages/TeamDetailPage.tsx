@@ -5,7 +5,7 @@ import {
   fetchTeam,
   getTeamMembersByTeamId,
 } from '../api/teamsApi'
-import { fetchCards, createCard } from '../api/cardsApi'
+import { fetchCardsByTeamId, createCard } from '../api/cardsApi'
 import type {
   CardRequestDto,
   CardResponseDto,
@@ -15,7 +15,6 @@ import type {
 } from '../types'
 
 const MEMBERS_PAGE_SIZE = 10
-const CARDS_PAGE_SIZE = 10
 
 function getTeamIdFromPath(): number | null {
   const match = window.location.pathname.match(/^\/teams\/(\d+)/)
@@ -30,9 +29,8 @@ export function TeamDetailPage() {
 
   const [team, setTeam] = useState<TeamResponseDto | null>(null)
   const [membersPage, setMembersPage] = useState<PageResponse<TeamMemberDto> | null>(null)
-  const [cardsPage, setCardsPage] = useState<PageResponse<CardResponseDto> | null>(null)
+  const [cards, setCards] = useState<CardResponseDto[]>([])
   const [membersPageNum, setMembersPageNum] = useState(0)
-  const [cardsPageNum, setCardsPageNum] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -68,29 +66,24 @@ export function TeamDetailPage() {
             page: membersPageNum,
             size: MEMBERS_PAGE_SIZE,
           }),
-          fetchCards({
-            teamId,
-            page: cardsPageNum,
-            size: CARDS_PAGE_SIZE,
-          }),
+          fetchCardsByTeamId(teamId),
         ])
         setTeam(teamRes)
         setMembersPage(membersRes)
-        setCardsPage(cardsRes)
+        setCards(cardsRes)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load team.')
         setTeam(null)
         setMembersPage(null)
-        setCardsPage(null)
+        setCards([])
       } finally {
         setLoading(false)
       }
     }
     load()
-  }, [teamId, membersPageNum, cardsPageNum])
+  }, [teamId, membersPageNum])
 
   const totalMembersPages = useMemo(() => membersPage?.totalPages ?? 0, [membersPage])
-  const totalCardsPages = useMemo(() => cardsPage?.totalPages ?? 0, [cardsPage])
 
   const handleCreateCard = async (e: FormEvent) => {
     e.preventDefault()
@@ -120,9 +113,8 @@ export function TeamDetailPage() {
         teamId,
       })
       setShowCreateCard(false)
-      setCardsPageNum(0)
-      const cardsRes = await fetchCards({ teamId, page: 0, size: CARDS_PAGE_SIZE })
-      setCardsPage(cardsRes)
+      const cardsRes = await fetchCardsByTeamId(teamId)
+      setCards(cardsRes)
     } catch (err) {
       setCardError(err instanceof Error ? err.message : 'Failed to create card.')
     }
@@ -260,49 +252,26 @@ export function TeamDetailPage() {
                 <button type="submit">Create card</button>
               </form>
             )}
-            {cardsPage?.content.length ? (
-              <>
-                <ul className="list" style={{ marginTop: '1rem' }}>
-                  {cardsPage.content.map((card) => (
-                    <li
-                      key={card.id}
-                      className="list-item"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => navigate(`/cards/${card.id}`)}
-                    >
-                      <strong>{card.title}</strong>
-                      <span className="muted"> · Card #{card.id}</span>
-                      {card.description && (
-                        <p className="muted" style={{ margin: '0.25rem 0 0' }}>
-                          {card.description.slice(0, 80)}
-                          {card.description.length > 80 ? '…' : ''}
-                        </p>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-                {totalCardsPages > 1 && (
-                  <div className="pagination">
-                    <button
-                      type="button"
-                      disabled={cardsPageNum === 0}
-                      onClick={() => setCardsPageNum((p) => p - 1)}
-                    >
-                      Previous
-                    </button>
-                    <span>
-                      Page {cardsPageNum + 1} of {totalCardsPages}
-                    </span>
-                    <button
-                      type="button"
-                      disabled={cardsPageNum + 1 >= totalCardsPages}
-                      onClick={() => setCardsPageNum((p) => p + 1)}
-                    >
-                      Next
-                    </button>
-                  </div>
-                )}
-              </>
+            {cards.length > 0 ? (
+              <ul className="list" style={{ marginTop: '1rem' }}>
+                {cards.map((card) => (
+                  <li
+                    key={card.id}
+                    className="list-item"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => navigate(`/cards/${card.id}`)}
+                  >
+                    <strong>{card.title}</strong>
+                    <span className="muted"> · Card #{card.id}</span>
+                    {card.description && (
+                      <p className="muted" style={{ margin: '0.25rem 0 0' }}>
+                        {card.description.slice(0, 80)}
+                        {card.description.length > 80 ? '…' : ''}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
             ) : (
               <p className="muted" style={{ marginTop: '1rem' }}>
                 No cards yet. Create one above.

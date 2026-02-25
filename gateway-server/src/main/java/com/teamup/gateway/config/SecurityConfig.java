@@ -19,8 +19,9 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
+                // .try to add a filter
             .authorizeExchange(exchange -> {
-                exchange//pathMatchers(HttpMethod.GET).permitAll()
+                exchange
                         .pathMatchers("/TEAMS/**").authenticated()
                         .pathMatchers("/USERS/**").authenticated();
             }).oauth2ResourceServer(oauth2 -> {

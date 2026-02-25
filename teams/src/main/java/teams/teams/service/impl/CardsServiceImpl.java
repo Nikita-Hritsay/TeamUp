@@ -65,6 +65,14 @@ public class CardsServiceImpl implements ICardsService {
     }
 
     @Override
+    public List<CardResponseDto> getCardsByTeamId(Long teamId) {
+        teamRepository.findById(teamId)
+                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId.toString()));
+        List<Card> cards = cardsRepository.findByTeam_Id(teamId);
+        return CardMapper.mapToCardsResponseDto(cards);
+    }
+
+    @Override
     public CardResponseDto updateCard(Long cardId,
                                       CardRequestDto cardRequestDto) {
         Card existingCard = cardsRepository.findById(cardId)

@@ -156,6 +156,31 @@ paths:
                 items:
                   $ref: '#/components/schemas/CardResponseDto'
 
+  /api/v1/cards/fetchByTeam:
+    get:
+      tags:
+        - Cards
+      summary: Get Cards by team ID REST API
+      description: Get a cards by team ID
+      operationId: getCardsByTeamId
+      parameters:
+        - name: teamId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Team ID
+      responses:
+        '200':
+          description: HTTP Status OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardResponseDto'
+
   /api/v1/cards/{cardId}:
     put:
       tags:

@@ -1,6 +1,7 @@
 package teams.teams.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -162,7 +163,6 @@ public class CardsController implements CardsApi {
                     )
             )
     })
-
     @DeleteMapping("/{cardId}")
     public ResponseEntity<ResponseDto> deleteCard(@PathVariable Long cardId) {
         boolean deleted = cardsService.deleteCard(cardId);
@@ -176,6 +176,27 @@ public class CardsController implements CardsApi {
             responseDto.setStatusMessage(CardConstants.MESSAGE_500);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
         }
+    }
+
+    @Operation(
+            operationId = "getCardsByTeamId",
+            summary = "Get Cards by team ID REST API",
+            description = "Get all cards for a team by team ID",
+            tags = { "Cards" },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "HTTP Status OK", content = {
+                            @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = CardResponseDto.class)))
+                    }),
+                    @ApiResponse(responseCode = "400", description = "Bad Request - teamId is required")
+            }
+    )
+    @GetMapping("/fetchByTeam")
+    public ResponseEntity<List<CardResponseDto>> getCardsByTeamId(@RequestParam Long teamId) {
+        if (teamId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        List<CardResponseDto> cards = cardsService.getCardsByTeamId(teamId);
+        return ResponseEntity.ok(cards);
     }
 
     @Override

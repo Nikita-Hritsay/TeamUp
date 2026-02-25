@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface CardsRepository extends JpaRepository<Card, Long>, JpaSpecificationExecutor<Card> {
     List<Card> findByOwnerId(Long ownerId);
+
+    List<Card> findByTeam_Id(Long teamId);
 }

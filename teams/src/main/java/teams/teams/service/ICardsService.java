@@ -34,6 +34,14 @@ public interface ICardsService {
     List<CardResponseDto> getCardsByUserId(Long userId);
 
     /**
+     * Retrieves a card by users ID
+     *
+     * @param userId the ID of the card to retrieve
+     * @return the card with the given ID
+     */
+    List<CardResponseDto> getCardsByTeamId(Long teamId);
+
+    /**
      * Updates an existing card
      *
      * @param cardId the ID of the card to update

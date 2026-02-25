@@ -34,6 +34,12 @@ export async function getCardsByUser(userId: number) {
   return handleResponse<CardResponseDto[]>(response)
 }
 
+export async function fetchCardsByTeamId(teamId: number): Promise<CardResponseDto[]> {
+  const url = `${BASE_URL}/fetchByTeam?teamId=${encodeURIComponent(teamId)}`
+  const response = await fetchWithAuth(url)
+  return handleResponse<CardResponseDto[]>(response)
+}
+
 export async function createCard(payload: CardRequestDto) {
   const response = await fetchWithAuth(BASE_URL, {
     method: 'POST',
