@@ -1,13 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
 import { useNavigate } from '../routerShim'
-import {
-  fetchTeam,
-  getTeamMembersByTeamId,
-} from '../api/teamsApi'
-import { fetchCardsByTeamId, createCard } from '../api/cardsApi'
+import { fetchTeam, getTeamMembersByTeamId, joinTeam } from '../api/teamsApi'
+import { fetchCardsByTeamId } from '../api/cardsApi'
+import { getStoredUserId } from './ProfilePage'
 import type {
-  CardRequestDto,
   CardResponseDto,
   PageResponse,
   TeamMemberDto,
@@ -17,10 +13,15 @@ import type {
 const MEMBERS_PAGE_SIZE = 10
 
 function getTeamIdFromPath(): number | null {
-  const match = window.location.pathname.match(/^\/teams\/(\d+)/)
+  const match = window.location.pathname.match(/^\/teams\/(\d+)$/)
   if (!match) return null
   const n = parseInt(match[1], 10)
   return Number.isNaN(n) ? null : n
+}
+
+function ownerFromMembers(members?: TeamMemberDto[]): TeamMemberDto | null {
+  if (!members?.length) return null
+  return members.find((m) => m.role === 'CREATOR' || m.role === 'LEADER') ?? null
 }
 
 export function TeamDetailPage() {
@@ -33,17 +34,7 @@ export function TeamDetailPage() {
   const [membersPageNum, setMembersPageNum] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-
-  const [showCreateCard, setShowCreateCard] = useState(false)
-  const [cardForm, setCardForm] = useState<CardRequestDto>({
-    title: '',
-    description: '',
-    posterUrl: '',
-    ownerId: 0,
-    teamId: teamId ?? 0,
-  })
-  const [cardMessage, setCardMessage] = useState('')
-  const [cardError, setCardError] = useState('')
+  const [joinMessage, setJoinMessage] = useState<{ cardId?: number; ok: boolean; text: string } | null>(null)
 
   useEffect(() => {
     if (!teamId) {
@@ -51,21 +42,13 @@ export function TeamDetailPage() {
       setLoading(false)
       return
     }
-    setCardForm((f) => ({ ...f, teamId }))
-  }, [teamId])
-
-  useEffect(() => {
-    if (!teamId) return
     const load = async () => {
       setLoading(true)
       setError('')
       try {
         const [teamRes, membersRes, cardsRes] = await Promise.all([
           fetchTeam(teamId),
-          getTeamMembersByTeamId(teamId, {
-            page: membersPageNum,
-            size: MEMBERS_PAGE_SIZE,
-          }),
+          getTeamMembersByTeamId(teamId, { page: membersPageNum, size: MEMBERS_PAGE_SIZE }),
           fetchCardsByTeamId(teamId),
         ])
         setTeam(teamRes)
@@ -84,48 +67,49 @@ export function TeamDetailPage() {
   }, [teamId, membersPageNum])
 
   const totalMembersPages = useMemo(() => membersPage?.totalPages ?? 0, [membersPage])
+  const owner = useMemo(() => {
+    const fromTeam = team?.teamMembers?.length ? ownerFromMembers(team.teamMembers) : null
+    if (fromTeam) return fromTeam
+    return membersPage?.content?.length ? ownerFromMembers(membersPage.content) : null
+  }, [team?.teamMembers, membersPage?.content])
 
-  const handleCreateCard = async (e: FormEvent) => {
-    e.preventDefault()
-    setCardError('')
-    setCardMessage('')
-    if (!teamId || !cardForm.title) {
-      setCardError('Title is required.')
-      return
-    }
-    const ownerId = cardForm.ownerId
-    if (!ownerId || ownerId < 1) {
-      setCardError('Owner ID is required (numeric user ID from the Users service).')
-      return
-    }
+  const storedUserId = getStoredUserId()
+  const canJoin = Boolean(teamId && storedUserId != null && storedUserId >= 1)
+
+  const handleJoinApply = async (cardId?: number) => {
+    if (!teamId || !storedUserId) return
+    setJoinMessage(null)
     try {
-      await createCard({
-        ...cardForm,
+      await joinTeam({
+        userId: storedUserId,
+        role: 'PARTICIPANT',
         teamId,
-        ownerId,
+        ...(cardId != null ? { cardId } : {}),
       })
-      setCardMessage('Card created.')
-      setCardForm({
-        title: '',
-        description: '',
-        posterUrl: '',
-        ownerId: cardForm.ownerId || ownerId,
-        teamId,
-      })
-      setShowCreateCard(false)
-      const cardsRes = await fetchCardsByTeamId(teamId)
+      setJoinMessage({ cardId, ok: true, text: 'Request sent.' })
+      const [teamRes, membersRes, cardsRes] = await Promise.all([
+        fetchTeam(teamId),
+        getTeamMembersByTeamId(teamId, { page: membersPageNum, size: MEMBERS_PAGE_SIZE }),
+        fetchCardsByTeamId(teamId),
+      ])
+      setTeam(teamRes)
+      setMembersPage(membersRes)
       setCards(cardsRes)
     } catch (err) {
-      setCardError(err instanceof Error ? err.message : 'Failed to create card.')
+      setJoinMessage({
+        cardId,
+        ok: false,
+        text: err instanceof Error ? err.message : 'Failed to join.',
+      })
     }
   }
 
   if (!teamId) {
     return (
-      <section>
+      <section className="page-section">
         <div className="error">Invalid team.</div>
-        <button type="button" onClick={() => navigate('/teams')}>
-          Back to Teams
+        <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>
+          Back to Home
         </button>
       </section>
     )
@@ -133,43 +117,46 @@ export function TeamDetailPage() {
 
   if (loading) {
     return (
-      <section>
-        <h2>Team</h2>
-        <p>Loading…</p>
+      <section className="page-section">
+        <h2 className="page-title">Team</h2>
+        <p className="muted">Loading…</p>
       </section>
     )
   }
 
   if (error) {
     return (
-      <section>
-        <h2>Team</h2>
+      <section className="page-section">
+        <h2 className="page-title">Team</h2>
         <div className="error">{error}</div>
-        <button type="button" onClick={() => navigate('/teams')}>
-          Back to Teams
+        <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>
+          Back to Home
         </button>
       </section>
     )
   }
 
   return (
-    <section>
-      <div style={{ marginBottom: '1rem' }}>
-        <button type="button" onClick={() => navigate('/teams')}>
-          ← Back to Teams
+    <section className="page-section">
+      <div className="page-actions">
+        <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>
+          ← Back to Home
         </button>
       </div>
       {team && (
         <>
-          <h2>{team.name}</h2>
-          {team.description && (
-            <p className="muted" style={{ marginBottom: '1rem' }}>
-              {team.description}
-            </p>
-          )}
+          <div className="panel team-info-panel">
+            <h2 className="team-name">{team.name}</h2>
+            {team.description && (
+              <p className="team-description muted">{team.description}</p>
+            )}
+            {owner && (
+              <p className="team-owner muted">Owner: User {owner.userId}</p>
+            )}
+          </div>
 
           <div className="panel">
-            <h3>Team Members</h3>
+            <h3>Members</h3>
             {membersPage?.content.length ? (
               <>
                 <ul className="list">
@@ -177,9 +164,7 @@ export function TeamDetailPage() {
                     <li key={m.id ?? `${m.userId}-${m.teamId}`} className="list-item">
                       <strong>User {m.userId}</strong>
                       <span className="muted"> · {m.role}</span>
-                      {m.status && (
-                        <span className="muted"> · {m.status}</span>
-                      )}
+                      {m.status && <span className="muted"> · {m.status}</span>}
                     </li>
                   ))}
                 </ul>
@@ -210,72 +195,57 @@ export function TeamDetailPage() {
             )}
           </div>
 
-          <div className="panel">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <h3 style={{ margin: 0 }}>Cards</h3>
-              <button type="button" onClick={() => setShowCreateCard((v) => !v)}>
-                {showCreateCard ? 'Cancel' : 'Create new card'}
+          <div className="panel cards-panel">
+            <div className="panel-header">
+              <h3 style={{ margin: 0 }}>Cards (vacancies)</h3>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => navigate(`/teams/${teamId}/create-card`)}
+              >
+                Create card
               </button>
             </div>
-            {showCreateCard && (
-              <form className="form" onSubmit={handleCreateCard} style={{ marginTop: '1rem' }}>
-                <label className="form-field">
-                  <span>Title</span>
-                  <input
-                    value={cardForm.title}
-                    onChange={(e) => setCardForm((f) => ({ ...f, title: e.target.value }))}
-                    required
-                    minLength={3}
-                  />
-                </label>
-                <label className="form-field">
-                  <span>Description</span>
-                  <textarea
-                    value={cardForm.description ?? ''}
-                    onChange={(e) => setCardForm((f) => ({ ...f, description: e.target.value }))}
-                  />
-                </label>
-                <label className="form-field">
-                  <span>Owner ID</span>
-                  <input
-                    type="number"
-                    min={1}
-                    value={cardForm.ownerId || ''}
-                    onChange={(e) =>
-                      setCardForm((f) => ({ ...f, ownerId: parseInt(e.target.value, 10) || 0 }))
-                    }
-                    required
-                  />
-                </label>
-                {cardError && <div className="error">{cardError}</div>}
-                {cardMessage && <div className="success">{cardMessage}</div>}
-                <button type="submit">Create card</button>
-              </form>
+            {joinMessage && (
+              <div className={joinMessage.ok ? 'success' : 'error'}>{joinMessage.text}</div>
             )}
             {cards.length > 0 ? (
-              <ul className="list" style={{ marginTop: '1rem' }}>
+              <div className="cards-list">
                 {cards.map((card) => (
-                  <li
-                    key={card.id}
-                    className="list-item"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => navigate(`/cards/${card.id}`)}
-                  >
-                    <strong>{card.title}</strong>
-                    <span className="muted"> · Card #{card.id}</span>
+                  <article key={card.id} className="vacancy-card">
+                    <h4 className="vacancy-card-title">{card.title}</h4>
                     {card.description && (
-                      <p className="muted" style={{ margin: '0.25rem 0 0' }}>
-                        {card.description.slice(0, 80)}
-                        {card.description.length > 80 ? '…' : ''}
+                      <p className="vacancy-card-description muted">
+                        {card.description.length > 100
+                          ? `${card.description.slice(0, 100)}…`
+                          : card.description}
                       </p>
                     )}
-                  </li>
+                    <div className="vacancy-card-actions">
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => navigate(`/cards/${card.id}`)}
+                      >
+                        View
+                      </button>
+                      {canJoin ? (
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => handleJoinApply(card.id)}
+                        >
+                          Join / Apply
+                        </button>
+                      ) : (
+                        <span className="muted small">Set your User ID in Profile to join</span>
+                      )}
+                    </div>
+                  </article>
                 ))}
-              </ul>
+              </div>
             ) : (
-              <p className="muted" style={{ marginTop: '1rem' }}>
-                No cards yet. Create one above.
-              </p>
+              <p className="muted">No cards yet. Create one to add vacancies.</p>
             )}
           </div>
         </>

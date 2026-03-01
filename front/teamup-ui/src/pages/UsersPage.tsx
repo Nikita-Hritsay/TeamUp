@@ -49,8 +49,8 @@ export function UsersPage() {
   }
 
   return (
-    <section>
-      <h2>Users</h2>
+    <section className="page-section">
+      <h2 className="page-title">Users</h2>
       <form className="form" onSubmit={handleSubmit}>
         <label className="form-field">
           <span>User ID</span>
@@ -70,7 +70,7 @@ export function UsersPage() {
       {error && <div className="error">{error}</div>}
 
       {user && (
-        <div className="panel">
+        <div className="panel profile-panel">
           <h3>
             {user.firstName} {user.lastName}
           </h3>

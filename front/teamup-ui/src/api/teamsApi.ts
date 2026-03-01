@@ -1,7 +1,9 @@
-import type { PageResponse, ResponseDto, TeamMemberDto, TeamRequestDto, TeamResponseDto } from '../types'
+import type { PageResponse, ResponseDto, TeamMemberDto, TeamMemberRequestDto, TeamRequestDto, TeamResponseDto } from '../types'
 import { fetchWithAuth, handleResponse } from './client'
 
 const BASE_URL = import.meta.env.VITE_TEAMS_API_URL ?? 'http://localhost:8081/api/v1/teams'
+
+const DEFAULT_PAGE_SIZE = 100
 
 export async function listTeams(params?: { page?: number; size?: number; userId?: number }) {
   const url = new URL(BASE_URL)
@@ -10,6 +12,20 @@ export async function listTeams(params?: { page?: number; size?: number; userId?
   if (params?.userId !== undefined) url.searchParams.set('userId', String(params.userId))
   const response = await fetchWithAuth(url.toString())
   return handleResponse<PageResponse<TeamResponseDto>>(response)
+}
+
+/** Fetch all teams (no pagination UI). Uses multiple pages if needed. */
+export async function listAllTeams(): Promise<TeamResponseDto[]> {
+  const all: TeamResponseDto[] = []
+  let page = 0
+  let hasMore = true
+  while (hasMore) {
+    const res = await listTeams({ page, size: DEFAULT_PAGE_SIZE })
+    all.push(...res.content)
+    hasMore = res.content.length === DEFAULT_PAGE_SIZE && page + 1 < res.totalPages
+    page += 1
+  }
+  return all
 }
 
 export async function getTeamMembersByTeamId(
@@ -32,7 +48,7 @@ export async function createTeam(payload: TeamRequestDto) {
   return handleResponse<ResponseDto>(response)
 }
 
-export async function joinTeam(payload: TeamMemberDto) {
+export async function joinTeam(payload: TeamMemberRequestDto) {
   const response = await fetchWithAuth(`${BASE_URL}/join`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

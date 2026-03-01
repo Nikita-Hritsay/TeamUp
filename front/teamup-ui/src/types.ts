@@ -47,6 +47,14 @@ export type TeamMemberDto = {
   updatedBy?: string
 }
 
+/** Request body for joinTeam (OpenAPI TeamMemberRequestDto). */
+export type TeamMemberRequestDto = {
+  userId: number
+  role: 'CREATOR' | 'PARTICIPANT' | 'LEADER'
+  teamId: number
+  cardId?: number
+}
+
 export type RoleDto = {
   roleName: string
 }

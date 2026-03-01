@@ -37,23 +37,25 @@ export function CardDetailPage() {
 
   if (isLoading) {
     return (
-      <section>
-        <h2>Card Details</h2>
+      <section className="page-section">
+        <h2 className="page-title">Card Details</h2>
         <div className="panel">
-          <p>Loading card details…</p>
+          <p className="muted">Loading card details…</p>
         </div>
       </section>
     )
   }
 
+  const backTo = card?.teamId ? `/teams/${card.teamId}` : '/'
+
   if (error) {
     return (
-      <section>
-        <h2>Card Details</h2>
+      <section className="page-section">
+        <h2 className="page-title">Card Details</h2>
         <div className="panel">
           <div className="error">{error}</div>
-          <button type="button" onClick={() => navigate('/cards')}>
-            Back to Cards
+          <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>
+            Back to Home
           </button>
         </div>
       </section>
@@ -62,12 +64,12 @@ export function CardDetailPage() {
 
   if (!card) {
     return (
-      <section>
-        <h2>Card Details</h2>
+      <section className="page-section">
+        <h2 className="page-title">Card Details</h2>
         <div className="panel">
           <p>Card not found.</p>
-          <button type="button" onClick={() => navigate('/cards')}>
-            Back to Cards
+          <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>
+            Back to Home
           </button>
         </div>
       </section>
@@ -75,13 +77,13 @@ export function CardDetailPage() {
   }
 
   return (
-    <section>
-      <div style={{ marginBottom: '1rem' }}>
-        <button type="button" onClick={() => navigate('/cards')}>
-          ← Back to Cards
+    <section className="page-section">
+      <div className="page-actions">
+        <button type="button" className="btn btn-secondary" onClick={() => navigate(backTo)}>
+          ← Back to {card.teamId ? 'Team' : 'Home'}
         </button>
       </div>
-      <h2>{card.title}</h2>
+      <h2 className="page-title">{card.title}</h2>
       <div className="panel">
         <div style={{ marginBottom: '1rem' }}>
           {card.posterUrl && (
@@ -98,7 +100,7 @@ export function CardDetailPage() {
             <p>{card.description || 'No description provided.'}</p>
           </div>
         </div>
-        <div className="muted" style={{ borderTop: '1px solid #ddd', paddingTop: '1rem' }}>
+        <div className="muted card-meta">
           <p>
             <strong>Card ID:</strong> {card.id}
           </p>
