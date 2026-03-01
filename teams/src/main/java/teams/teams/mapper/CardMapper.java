@@ -9,6 +9,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CardMapper {
@@ -31,9 +32,9 @@ public class CardMapper {
         responseDto.setPosterUrl(URI.create(card.getPosterUrl()));
         responseDto.setOwnerId(card.getOwnerId());
         responseDto.setTeamId(card.getTeam().getId());
-        responseDto.setCreatedAt(card.getCreatedAt().atZone(ZoneId.systemDefault()).toOffsetDateTime());
+        responseDto.setCreatedAt(card.getCreatedAt() != null ? card.getCreatedAt().atZone(ZoneId.systemDefault()).toOffsetDateTime() : null);
         responseDto.setCreatedBy(card.getCreatedBy());
-        responseDto.setUpdatedAt(card.getUpdatedAt().atZone(ZoneId.systemDefault()).toOffsetDateTime());
+        responseDto.setUpdatedAt(card.getUpdatedAt() != null ? card.getUpdatedAt().atZone(ZoneId.systemDefault()).toOffsetDateTime() : null);
         responseDto.setUpdatedBy(card.getUpdatedBy());
         return responseDto;
     }
