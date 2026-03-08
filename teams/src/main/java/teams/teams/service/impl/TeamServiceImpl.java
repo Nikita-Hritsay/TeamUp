@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teams.teams.constants.TeamConstants;
 import teams.teams.api.model.*;
-import teams.teams.dto.UserDto;
 import teams.teams.entity.Card;
 import teams.teams.entity.Team;
 import teams.teams.entity.TeamMember;
@@ -20,9 +19,6 @@ import teams.teams.repository.TeamRepository;
 import teams.teams.service.ITeamService;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import jakarta.persistence.criteria.Predicate;
 
 @Service
 @AllArgsConstructor
@@ -35,16 +31,15 @@ public class TeamServiceImpl implements ITeamService {
     @Override
     @Transactional
     public TeamMemberResponseDto joinTeam(TeamMemberRequestDto teamMemberRequestDto) {
-        // Check if the user is already a member of this team
-        teamMemberRepository.findByTeamIdAndUserId(teamMemberRequestDto.getTeamId(), teamMemberRequestDto.getUserId())
+        teamMemberRepository.findByCardIdAndUserId(teamMemberRequestDto.getCardId(), teamMemberRequestDto.getUserId())
                 .ifPresent(existingMember -> {
                     throw new IllegalStateException("User is already a member or has a pending invitation");
                 });
-
-        // Create a new team member with PENDING status
-        TeamMember teamMember = TeamMapper.mapToTeamMember(teamMemberRequestDto, new TeamMember());
+        Card card = cardsRepository.findById(teamMemberRequestDto.getCardId()).orElseThrow(() ->
+                new ResourceNotFoundException("Card", "id", teamMemberRequestDto.getCardId().toString()));
+        TeamMember teamMember = TeamMapper.mapToTeamMember(teamMemberRequestDto, card, new TeamMember());
+        teamMember.setRole(TeamConstants.ROLE_PARTICIPANT);
         teamMember.setStatus(TeamConstants.STATUS_PENDING);
-        
         TeamMember savedMember = teamMemberRepository.save(teamMember);
         return TeamMapper.mapToTeamMemberResponseDto(savedMember);
     }
@@ -62,21 +57,14 @@ public class TeamServiceImpl implements ITeamService {
     public TeamMemberResponseDto inviteToTeam(Long cardId, TeamMemberRequestDto teamMemberRequestDto) {
         Card card = cardsRepository.findById(cardId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card", "id", cardId.toString()));
-        if (!card.getTeam().getId().equals(teamMemberRequestDto.getTeamId())) {
-            throw new IllegalArgumentException("Card does not belong to the specified team");
-        }
         teamMemberRequestDto.setCardId(cardId);
-        teamMemberRequestDto.setTeamId(card.getTeam().getId());
-        // Check if the user is already a member of this team
         teamMemberRepository.findByCardIdAndUserId(cardId, teamMemberRequestDto.getUserId())
                 .ifPresent(existingMember -> {
                     throw new IllegalStateException("User is already a member or has a pending invitation");
                 });
-
-        // Create a new team member with PENDING status
-        TeamMember teamMember = TeamMapper.mapToTeamMember(teamMemberRequestDto, new TeamMember());
+        TeamMember teamMember = TeamMapper.mapToTeamMember(teamMemberRequestDto, card, new TeamMember());
+        teamMember.setRole(TeamConstants.ROLE_PARTICIPANT);
         teamMember.setStatus(TeamConstants.STATUS_PENDING);
-        
         TeamMember savedMember = teamMemberRepository.save(teamMember);
         return TeamMapper.mapToTeamMemberResponseDto(savedMember);
     }
@@ -84,17 +72,13 @@ public class TeamServiceImpl implements ITeamService {
     @Override
     @Transactional
     public TeamMemberResponseDto updateMemberStatus(Long cardId, Long userId, String status) {
-        Card card = cardsRepository.findById(cardId)
-                .orElseThrow(() -> new ResourceNotFoundException("Card", "id", cardId.toString()));
         TeamMember teamMember = teamMemberRepository.findByCardIdAndUserId(cardId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("TeamMember", "cardId and userId",
                         cardId + " and " + userId));
-        teamMember.setTeamId(card.getTeam().getId());
-
         if (TeamConstants.STATUS_JOINED.equals(status)) {
-            teamMember.join(); // Sets status to JOINED and updates joinedAt
+            teamMember.join();
         } else if (TeamConstants.STATUS_REJECTED.equals(status)) {
-            teamMember.reject(); // Sets status to REJECTED
+            teamMember.reject();
         } else {
             throw new IllegalArgumentException("Invalid status: " + status);
         }
@@ -118,10 +102,7 @@ public class TeamServiceImpl implements ITeamService {
 
     @Override
     public Page<TeamMemberResponseDto> getTeamMembers(Long cardId, Pageable pageable) {
-        Specification<TeamMember> spec = (root, query, cb) -> {
-            Predicate predicate = cb.equal(root.get("cardId"), cardId);
-            return predicate;
-        };
+        Specification<TeamMember> spec = (root, query, cb) -> cb.equal(root.get("cardId"), cardId);
         
         Page<TeamMember> teamMembersPage = teamMemberRepository.findAll(spec, pageable);
         return teamMembersPage.map(TeamMapper::mapToTeamMemberResponseDto);

@@ -46,12 +46,8 @@ public class BaseEntity {
      */
     @PrePersist
     private void setInitialLastModified() {
-        if (this.updatedAt == null) {
-            this.updatedAt = this.createdAt != null ? this.createdAt : LocalDateTime.now();
-        }
-        if (this.updatedBy == null) {
-            this.updatedBy = this.createdBy != null ? this.createdBy : "SYSTEM";
-        }
+        this.updatedAt = this.createdAt != null ? this.createdAt : LocalDateTime.now();
+        this.updatedBy = this.createdBy != null ? this.createdBy : "SYSTEM";
     }
 
 }

@@ -66,6 +66,19 @@ export async function getTeamMembers(cardId: number, params?: { page?: number; s
   return handleResponse<PageResponse<TeamMemberDto>>(response)
 }
 
+/** Accept or reject a team membership request (JOINED | REJECTED). */
+export async function updateMemberStatus(
+  cardId: number,
+  userId: number,
+  status: 'JOINED' | 'REJECTED'
+): Promise<TeamMemberDto> {
+  const url = new URL(`${BASE_URL}/${cardId}/status`)
+  url.searchParams.set('userId', String(userId))
+  url.searchParams.set('status', status)
+  const response = await fetchWithAuth(url.toString(), { method: 'PUT' })
+  return handleResponse<TeamMemberDto>(response)
+}
+
 export async function fetchTeam(teamId: number) {
   const response = await fetchWithAuth(`${BASE_URL}/fetch?teamId=${encodeURIComponent(teamId)}`)
   return handleResponse<TeamResponseDto>(response)

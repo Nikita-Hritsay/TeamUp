@@ -21,7 +21,10 @@ public class TeamConstants {
     public static final String STATUS_PENDING = "PENDING";
     public static final String STATUS_JOINED = "JOINED";
     public static final String STATUS_REJECTED = "REJECTED";
-    
+
+    // Default role for join/invite requests
+    public static final String ROLE_PARTICIPANT = "PARTICIPANT";
+
     private TeamConstants() {
         // Private constructor to prevent instantiation
     }

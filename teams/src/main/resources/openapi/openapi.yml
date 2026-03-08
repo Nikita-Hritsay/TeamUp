@@ -406,7 +406,8 @@ paths:
           required: true
           schema:
             type: string
-          description: New status
+            enum: [JOINED, REJECTED]
+          description: New status (JOINED to accept, REJECTED to reject the request)
       responses:
         '200':
           description: HTTP Status OK
@@ -703,26 +704,12 @@ components:
       type: object
       required:
         - userId
-        - role
-        - teamId
+        - cardId
       properties:
         userId:
           type: integer
           format: int64
           description: ID of the user to add to the team
-          example: 1
-        role:
-          type: string
-          enum:
-            - CREATOR
-            - PARTICIPANT
-            - LEADER
-          description: Role of the user in the team
-          example: "PARTICIPANT"
-        teamId:
-          type: integer
-          format: int64
-          description: Team Id where user is added
           example: 1
         cardId:
           type: integer
@@ -743,29 +730,15 @@ components:
           format: int64
           description: ID of the card/project
           example: 1
-        teamId:
-          type: integer
-          format: int64
-          description: ID of the team
-          example: 1
         userId:
           type: integer
           format: int64
           description: ID of the user
           example: 1
-        role:
-          type: string
-          description: Role of the user in the team
-          example: "PARTICIPANT"
         status:
           type: string
           description: Status of participation
           example: "JOINED"
-        joinedAt:
-          type: string
-          format: date-time
-          description: Date and time when the user joined the team
-          example: "2023-01-01T10:00:00"
         createdAt:
           type: string
           format: date-time
