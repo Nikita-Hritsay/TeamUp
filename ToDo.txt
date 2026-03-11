@@ -1,2 +1,4 @@
 - fix the Docker Compose Keyclock
-- make rabbitmq work both ways and not just send a request to message endpoint
+- need to update security
+    - play with filters
+    - note the basic auth process
