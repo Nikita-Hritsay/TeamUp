@@ -49,7 +49,8 @@ public class TeamController implements TeamsApi {
             description = "Get the current build version of the service"
     )
     @GetMapping("/build-version")
-    public ResponseEntity<String> getTeamsBuildVersion() {
+    public ResponseEntity<String> getTeamsBuildVersion() throws InterruptedException {
+        Thread.sleep(10000);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(buildVersion);

@@ -22,11 +22,14 @@ spring:
       definition: emailsSent
     stream:
       bindings:
-        sendCommunication-out-0:
-          destination: send-communication
+        userCreation-out-0:
+          destination: send-userCreation
           group: ${spring.application.name}
         emailsSent-in-0:
           destination: communication-sent
+          group: ${spring.application.name}
+        communicationsError-in-0:
+          destination: send-userCreation.DLQ
           group: ${spring.application.name}
       kafka:
         binder:

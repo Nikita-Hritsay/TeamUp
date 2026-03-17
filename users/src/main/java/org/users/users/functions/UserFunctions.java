@@ -24,5 +24,11 @@ public class UserFunctions {
         };
     }
 
+    @Bean
+    public Consumer<Long> communicationsError() {
+        return id -> {
+            System.out.println("Communications error");
+        };
+    }
 
 }

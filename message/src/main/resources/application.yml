@@ -7,7 +7,7 @@ spring:
     stream:
       bindings:
         emailsms-in-0:
-          destination: send-communication
+          destination: send-userCreation
           group: ${spring.application.name}
         emailsms-out-0:
           destination: communication-sent
@@ -16,6 +16,11 @@ spring:
         binder:
           brokers:
             - localhost:9092
+        bindings:
+          emailsms-in-0:
+            consumer:
+              enable-dlq: true
+              dlq-name: send-userCreation.DLQ
 
 server:
   port: 9010

@@ -13,7 +13,7 @@ public class MessageConfiguration {
     public Function<UserMessageDto, UserMessageDto> email() {
         return userMessageDTO -> {
             System.out.println("Emailing: " + userMessageDTO.email());
-            return userMessageDTO;
+            throw new RuntimeException("ERROR Testing");
         };
     }
 

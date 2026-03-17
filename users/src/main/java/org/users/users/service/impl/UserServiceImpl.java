@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.users.users.dto.UserDto;
@@ -43,8 +44,8 @@ public class UserServiceImpl implements IUserService {
         }
         createNewUserWithDefaultRole(user);
         User saved = userRepository.save(user);
-        var send = streamBridge.send("sendCommunication-out-0",
-                new UserMessageDto(saved.getId(), saved.getFirstName(), saved.getLastName(), saved.getEmail(), saved.getMobileNumber()));
+        var send = streamBridge.send("userCreation-out-0", MessageBuilder.withPayload(
+                new UserMessageDto(saved.getId(), saved.getFirstName(), saved.getLastName(), saved.getEmail(), saved.getMobileNumber())).setHeader("partitionKey", saved.getId()).build());
         log.info("User send out: {}", send);
         return saved;
     }

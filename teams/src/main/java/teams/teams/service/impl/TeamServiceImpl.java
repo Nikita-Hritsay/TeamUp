@@ -1,6 +1,7 @@
 package teams.teams.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -28,6 +29,8 @@ public class TeamServiceImpl implements ITeamService {
     private final TeamRepository teamRepository;
     private final CardsRepository cardsRepository;
 
+    private final StreamBridge streamBridge;
+
     @Override
     @Transactional
     public TeamMemberResponseDto joinTeam(TeamMemberRequestDto teamMemberRequestDto) {
@@ -41,6 +44,7 @@ public class TeamServiceImpl implements ITeamService {
         teamMember.setRole(TeamConstants.ROLE_PARTICIPANT);
         teamMember.setStatus(TeamConstants.STATUS_PENDING);
         TeamMember savedMember = teamMemberRepository.save(teamMember);
+
         return TeamMapper.mapToTeamMemberResponseDto(savedMember);
     }
 
