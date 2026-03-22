@@ -1,28 +1,21 @@
 package org.message.service.message.config;
 
-import org.message.service.message.dto.UserMessageDto;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.TopicPartition;
 
-import java.util.function.Function;
 
 @Configuration
 public class MessageConfiguration {
 
-    @Bean
-    public Function<UserMessageDto, UserMessageDto> email() {
-        return userMessageDTO -> {
-            System.out.println("Emailing: " + userMessageDTO.email());
-            throw new RuntimeException("ERROR Testing");
-        };
+    @KafkaListener(id="email", topicPartitions = {@TopicPartition(topic="send-userCreationNotifications", partitions = "0")})
+    public void email(String email) {
+        System.out.println("Email is sent to "  + email);
     }
 
-    @Bean
-    public Function<UserMessageDto, Long> sms() {
-        return userMessageDTO -> {
-            System.out.println("Sending message: " + userMessageDTO.mobileNumber());
-            return userMessageDTO.id();
-        };
+    @KafkaListener(id="sms", topicPartitions = {@TopicPartition(topic = "send-userCreationNotifications", partitions = {"1"})})
+    public void sms(String mobileNumber) {
+        System.out.println("Sms is sent to "  + mobileNumber);
     }
 
 }
