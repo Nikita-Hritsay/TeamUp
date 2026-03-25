@@ -14,13 +14,13 @@ public class UserFunctions {
     private static Logger logger = LoggerFactory.getLogger(UserFunctions.class);
 
     @Bean
-    public Consumer<Long> emailsSent(UserRepository userRepository) {
-        return id -> {
-            userRepository.findById(id).ifPresentOrElse(user -> {
-                logger.info("Communications sent to user " + id);
+    public Consumer<String> emailsSent(UserRepository userRepository) {
+        return mobileNumber -> {
+            userRepository.findByMobileNumber(mobileNumber).ifPresentOrElse(user -> {
+                logger.info("Communications sent to user with mobile number: " + mobileNumber);
                 user.setSentEmails(true);
                 userRepository.save(user);
-            }, () -> {throw new RuntimeException("Could not update user with id " + id);});
+            }, () -> {throw new RuntimeException("Could not update user with mobile number " + mobileNumber);});
         };
     }
 

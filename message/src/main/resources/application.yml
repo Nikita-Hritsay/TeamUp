@@ -1,12 +1,6 @@
 spring:
   application:
     name: "message"
-  cloud:
-    stream:
-      kafka:
-        binder:
-          brokers:
-            - localhost:9092
 
 server:
   port: 9010

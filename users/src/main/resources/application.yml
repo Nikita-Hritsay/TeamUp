@@ -23,7 +23,7 @@ spring:
     stream:
       bindings:
         userCreation-out-0:
-          destination: send-userCreationNotifications
+          destination: send-userCreationNotificationSms
           group: ${spring.application.name}
         emailsSent-in-0:
           destination: communication-sent
